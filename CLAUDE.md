@@ -9,6 +9,15 @@ rules below come from.
 - Don't push to `main` on your own: commit to the work branch and ship to `main`
   only when the user says "в прод".
 
+## Deploys
+- Vercel Hobby allows 100 deploys a day, and every push to `main` is one.
+  Batch changes into a single push instead of pushing fix after fix, and
+  remember env vars only reach a deployment that was built after they were
+  set, so adding one means a rebuild.
+- Files under `api/` whose name starts with `_` are not routed: Vercel treats
+  them as helper modules. That is why `_config.js` is shared and why an
+  endpoint must never be named that way.
+
 ## Layout
 - `mobile/` is the Expo app. `api/` is two Vercel functions, and they exist for
   one reason: the OAuth code exchange needs the app secret, which cannot ship in
