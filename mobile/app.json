@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "whydrop",
+    "slug": "whydrop",
+    "scheme": "whydrop",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0B0C",
+    "primaryColor": "#C8FF4A",
+    "ios": {
+      "bundleIdentifier": "app.whydrop.ios",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleLocalizations": ["ru", "en"]
+      }
+    },
+    "android": {
+      "package": "app.whydrop.android",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-secure-store",
+        { "faceIDPermission": false }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0B0C"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "owner": "charlott4ka",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}

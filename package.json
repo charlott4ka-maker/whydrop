@@ -1,0 +1,7 @@
+{
+  "name": "whydrop",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Diagnoses a drop in Instagram reach: the cause and two things to do."
+}
