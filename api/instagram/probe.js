@@ -61,7 +61,7 @@ export default async function handler(req, res) {
       expiresAt: d?.expires_at ?? null,
       scopes: d?.scopes ?? null,
       granular: (d?.granular_scopes ?? []).map((g) => ({ scope: g.scope, targets: g.target_ids ?? [] })),
-      error: body?.error ? shape(body.error) : undefined,
+      error: body?.error ? { message: body.error.message, code: body.error.code, sub: body.error.error_subcode } : undefined,
     };
     targets = [...new Set(tokenInfo.granular.flatMap((g) => g.targets))];
   } else {
