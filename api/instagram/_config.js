@@ -1,8 +1,15 @@
-/** Insights need the manage_insights scope; basic covers the username, the
- *  picture, the follower count and the media list. */
-export const SCOPES = "instagram_business_basic,instagram_business_manage_insights";
+// Meta closed "Instagram API with Instagram Login" to new apps, so this is the
+// unified login: Facebook Login for Business with a configuration id. The
+// configuration, not the request, decides which permissions are asked for and
+// which business assets the user hands over, so there is no scope parameter
+// here any more.
 
-/** Must match the redirect URI saved in the Meta app byte for byte. */
+/** Graph version. Bump deliberately, never silently: field names move. */
+export const GRAPH = "https://graph.facebook.com/v23.0";
+
+export const AUTH_DIALOG = "https://www.facebook.com/v23.0/dialog/oauth";
+
+/** Must match a redirect URI registered on the configuration, byte for byte. */
 export function redirectUri(req) {
   if (process.env.IG_REDIRECT_URI) return process.env.IG_REDIRECT_URI;
   const host = req.headers["x-forwarded-host"] || req.headers.host;
