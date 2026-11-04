@@ -68,6 +68,26 @@ export default async function handler(req, res) {
     tokenInfo = { error: "IG_CLIENT_ID or IG_CLIENT_SECRET missing, cannot debug the token" };
   }
 
+  // Is the app secret right? Ask for a token with a code that cannot be valid:
+  // a wrong secret complains about the secret, a right one about the code. The
+  // two messages are different, which is the whole point of asking.
+  let secretCheck = { note: "IG_CLIENT_ID or IG_CLIENT_SECRET missing" };
+  if (clientId && clientSecret) {
+    const u = new URL(`${GRAPH}/oauth/access_token`);
+    u.searchParams.set("client_id", clientId);
+    u.searchParams.set("client_secret", clientSecret);
+    u.searchParams.set("redirect_uri", `https://${req.headers["x-forwarded-host"] || req.headers.host}/api/instagram/callback`);
+    u.searchParams.set("code", "deliberately-invalid");
+    const { status, body } = await get(u.toString());
+    secretCheck = {
+      status,
+      message: body?.error?.message ?? null,
+      code: body?.error?.code ?? null,
+      // Meta blames the code, not the secret: the secret is accepted
+      secretLooksRight: /verification code|authorization code/i.test(body?.error?.message || ""),
+    };
+  }
+
   // Which permissions are actually granted, by name.
   const perms = await get(`${GRAPH}/me/permissions?access_token=${token}`);
   out.push({
@@ -98,5 +118,5 @@ export default async function handler(req, res) {
     out.push(await probe(`${id} media`, `/${id}/media?fields=media_product_type,like_count,timestamp&limit=3`, token));
   }
 
-  res.status(200).json({ tokenInfo, targets, instagramAccounts: igIds.length, steps: out });
+  res.status(200).json({ secretCheck, tokenInfo, targets, instagramAccounts: igIds.length, steps: out });
 }
