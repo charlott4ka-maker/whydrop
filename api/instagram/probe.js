@@ -68,14 +68,34 @@ export default async function handler(req, res) {
     tokenInfo = { error: "IG_CLIENT_ID or IG_CLIENT_SECRET missing, cannot debug the token" };
   }
 
+  // Enough of each value to spot the usual mistakes (stray whitespace, a token
+  // pasted where a secret belongs) without printing the values themselves.
+  const look = (v) =>
+    v == null
+      ? null
+      : {
+          length: v.length,
+          head: v.slice(0, 4),
+          tail: v.slice(-4),
+          trimmedDiffers: v !== v.trim(),
+          allDigits: /^[0-9]+$/.test(v),
+          looksLikeToken: v.startsWith("EAA"),
+        };
+  const envLook = {
+    IG_CLIENT_ID: look(process.env.IG_CLIENT_ID),
+    IG_CONFIG_ID: look(process.env.IG_CONFIG_ID),
+    IG_CLIENT_SECRET: look(process.env.IG_CLIENT_SECRET),
+    IG_TEST_TOKEN: look(process.env.IG_TEST_TOKEN),
+  };
+
   // Is the app secret right? Ask for a token with a code that cannot be valid:
   // a wrong secret complains about the secret, a right one about the code. The
   // two messages are different, which is the whole point of asking.
   let secretCheck = { note: "IG_CLIENT_ID or IG_CLIENT_SECRET missing" };
   if (clientId && clientSecret) {
     const u = new URL(`${GRAPH}/oauth/access_token`);
-    u.searchParams.set("client_id", clientId);
-    u.searchParams.set("client_secret", clientSecret);
+    u.searchParams.set("client_id", clientId.trim());
+    u.searchParams.set("client_secret", clientSecret.trim());
     u.searchParams.set("redirect_uri", `https://${req.headers["x-forwarded-host"] || req.headers.host}/api/instagram/callback`);
     u.searchParams.set("code", "deliberately-invalid");
     const { status, body } = await get(u.toString());
@@ -118,5 +138,5 @@ export default async function handler(req, res) {
     out.push(await probe(`${id} media`, `/${id}/media?fields=media_product_type,like_count,timestamp&limit=3`, token));
   }
 
-  res.status(200).json({ secretCheck, tokenInfo, targets, instagramAccounts: igIds.length, steps: out });
+  res.status(200).json({ envLook, secretCheck, tokenInfo, targets, instagramAccounts: igIds.length, steps: out });
 }
