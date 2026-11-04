@@ -1,15 +1,14 @@
 // TEMPORARY. Unified login is documented in pieces, so rather than guess which
-// call returns the Instagram account id, this walks the candidates with a real
+// call reaches the Instagram account, this walks the candidates with a real
 // token and reports what came back. Delete it once the client code is written.
 //
-// It never returns strings from the API: every string becomes "str", so the
-// output shows field names and shapes but no account data and no token. Runs
-// only while IG_TEST_TOKEN is set; unset the variable to turn it off.
+// It returns no free-form strings from the API: names, usernames and the token
+// never appear. Permission names and object ids do, because they come from our
+// own configuration and are what the client code has to be written against.
+// Runs only while IG_TEST_TOKEN is set; unset the variable to turn it off.
 
 import { GRAPH } from "./_config.js";
 
-/** Values collapse to their type; numbers and booleans are kept, they are the
- *  ones worth seeing (counts, flags) and none of them identify anybody. */
 function shape(v, depth = 0) {
   if (v === null) return null;
   if (Array.isArray(v)) return depth > 4 ? "[...]" : { array: v.length, of: v.length ? shape(v[0], depth + 1) : null };
@@ -21,47 +20,76 @@ function shape(v, depth = 0) {
   return v;
 }
 
-async function probe(label, path, token) {
-  const url = path.includes("?") ? `${GRAPH}${path}&access_token=${token}` : `${GRAPH}${path}?access_token=${token}`;
+async function get(url) {
   try {
     const r = await fetch(url);
     const body = await r.json().catch(() => null);
-    return { label, path, status: r.status, body: shape(body) };
+    return { status: r.status, body };
   } catch (e) {
-    return { label, path, status: "fetch failed", error: e.message };
+    return { status: "fetch failed", body: { message: e.message } };
   }
 }
 
+const probe = async (label, path, token) => {
+  const sep = path.includes("?") ? "&" : "?";
+  const { status, body } = await get(`${GRAPH}${path}${sep}access_token=${token}`);
+  return { label, path, status, body: shape(body) };
+};
+
 export default async function handler(req, res) {
   const token = process.env.IG_TEST_TOKEN;
+  const clientId = process.env.IG_CLIENT_ID;
+  const clientSecret = process.env.IG_CLIENT_SECRET;
   if (!token) return res.status(404).send("Not found");
 
+  const out = [];
+
+  // What is this token, and which objects did the user actually grant? The
+  // granular scopes carry the target ids, which is the thing we are missing.
+  let targets = [];
+  let tokenInfo = null;
+  if (clientId && clientSecret) {
+    const appToken = `${clientId}|${clientSecret}`;
+    const { status, body } = await get(`${GRAPH}/debug_token?input_token=${token}&access_token=${appToken}`);
+    const d = body?.data;
+    tokenInfo = {
+      status,
+      type: d?.type ?? null,
+      isValid: d?.is_valid ?? null,
+      expiresAt: d?.expires_at ?? null,
+      scopes: d?.scopes ?? null,
+      granular: (d?.granular_scopes ?? []).map((g) => ({ scope: g.scope, targets: g.target_ids ?? [] })),
+      error: body?.error ? shape(body.error) : undefined,
+    };
+    targets = [...new Set(tokenInfo.granular.flatMap((g) => g.targets))];
+  } else {
+    tokenInfo = { error: "IG_CLIENT_ID or IG_CLIENT_SECRET missing, cannot debug the token" };
+  }
+
+  // Which permissions are actually granted, by name.
+  const perms = await get(`${GRAPH}/me/permissions?access_token=${token}`);
+  out.push({
+    label: "permissions",
+    status: perms.status,
+    granted: (perms.body?.data ?? []).filter((p) => p.status === "granted").map((p) => p.permission),
+    declined: (perms.body?.data ?? []).filter((p) => p.status !== "granted").map((p) => p.permission),
+  });
+
+  out.push(await probe("me metadata", "/me?metadata=1", token));
+  out.push(await probe("owned ig", "/me/owned_instagram_accounts", token));
+  out.push(await probe("assigned ig", "/me/assigned_instagram_accounts", token));
+
+  // Every object the token was granted: what is it, and does it behave like an
+  // Instagram account (profile, insights, media)?
   const day = 24 * 3600;
   const until = Math.floor(Date.now() / 1000);
   const since = until - 7 * day;
 
-  const steps = [
-    ["me", "/me?fields=id,name"],
-    ["pages", "/me/accounts?fields=id,name,instagram_business_account{id,username,profile_picture_url,followers_count}"],
-    ["businesses", "/me/businesses?fields=id,name"],
-    ["granted", "/me/permissions"],
-  ];
-  const out = [];
-  for (const [label, path] of steps) out.push(await probe(label, path, token));
-
-  // If a page carried an Instagram account, try what the diagnosis needs.
-  let igId = null;
-  try {
-    const r = await fetch(`${GRAPH}/me/accounts?fields=instagram_business_account{id}&access_token=${token}`);
-    const body = await r.json();
-    igId = body?.data?.find((p) => p.instagram_business_account)?.instagram_business_account?.id ?? null;
-  } catch {}
-
-  if (igId) {
-    out.push(await probe("ig profile", `/${igId}?fields=id,username,profile_picture_url,followers_count`, token));
-    out.push(await probe("ig reach", `/${igId}/insights?metric=reach&period=day&since=${since}&until=${until}`, token));
-    out.push(await probe("ig media", `/${igId}/media?fields=media_product_type,like_count,timestamp&limit=5`, token));
+  for (const id of targets.slice(0, 3)) {
+    out.push(await probe(`target ${id}`, `/${id}?fields=id,username,followers_count,media_count`, token));
+    out.push(await probe(`target ${id} reach`, `/${id}/insights?metric=reach&period=day&since=${since}&until=${until}`, token));
+    out.push(await probe(`target ${id} media`, `/${id}/media?fields=media_product_type,like_count,timestamp&limit=3`, token));
   }
 
-  res.status(200).json({ foundInstagramAccount: Boolean(igId), steps: out });
+  res.status(200).json({ tokenInfo, targets, steps: out });
 }

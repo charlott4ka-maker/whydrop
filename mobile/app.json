@@ -17,7 +17,10 @@
       },
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
-        "CFBundleLocalizations": ["ru", "en"]
+        "CFBundleLocalizations": [
+          "ru",
+          "en"
+        ]
       }
     },
     "android": {
@@ -35,7 +38,9 @@
       "expo-web-browser",
       [
         "expo-secure-store",
-        { "faceIDPermission": false }
+        {
+          "faceIDPermission": false
+        }
       ],
       [
         "expo-splash-screen",
@@ -53,6 +58,12 @@
     "owner": "charlott4ka",
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a9f512ef-a205-49b8-9521-36b433c84cf8"
+      }
     }
   }
 }
