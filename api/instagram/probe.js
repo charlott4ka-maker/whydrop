@@ -33,6 +33,8 @@ async function get(url) {
 const probe = async (label, path, token) => {
   const sep = path.includes("?") ? "&" : "?";
   const { status, body } = await get(`${GRAPH}${path}${sep}access_token=${token}`);
+  // Meta's own error text says what is wrong and carries no account data
+  if (body?.error) return { label, path, status, error: body.error.message, code: body.error.code };
   return { label, path, status, body: shape(body) };
 };
 
@@ -85,11 +87,16 @@ export default async function handler(req, res) {
   const until = Math.floor(Date.now() / 1000);
   const since = until - 7 * day;
 
-  for (const id of targets.slice(0, 3)) {
+  const assigned = await get(`${GRAPH}/me/assigned_instagram_accounts?access_token=${token}`);
+  const igIds = (assigned.body?.data ?? []).map((a) => a.id);
+
+  for (const id of [...new Set([...igIds, ...targets])].slice(0, 3)) {
     out.push(await probe(`target ${id}`, `/${id}?fields=id,username,followers_count,media_count`, token));
     out.push(await probe(`target ${id} reach`, `/${id}/insights?metric=reach&period=day&since=${since}&until=${until}`, token));
-    out.push(await probe(`target ${id} media`, `/${id}/media?fields=media_product_type,like_count,timestamp&limit=3`, token));
+    out.push(await probe(`${id} reach total`, `/${id}/insights?metric=reach&period=day&metric_type=total_value&since=${since}&until=${until}`, token));
+    out.push(await probe(`${id} views`, `/${id}/insights?metric=views&period=day&since=${since}&until=${until}`, token));
+    out.push(await probe(`${id} media`, `/${id}/media?fields=media_product_type,like_count,timestamp&limit=3`, token));
   }
 
-  res.status(200).json({ tokenInfo, targets, steps: out });
+  res.status(200).json({ tokenInfo, targets, instagramAccounts: igIds.length, steps: out });
 }
