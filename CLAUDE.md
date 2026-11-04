@@ -61,16 +61,26 @@ rules below come from.
 - Thresholds live in that one file. Change them there, never in a screen.
 
 ## Instagram (mobile/src/lib/instagram.ts, api/instagram)
-- "Instagram API with Instagram Login": Business and Creator accounts only.
-  Personal accounts have no insights through the API at all, which is why
-  typing the numbers in by hand is a first class path and not a fallback.
-- Scopes: `instagram_business_basic` and `instagram_business_manage_insights`.
-  Both need Meta App Review before anyone outside the test users can connect.
-- Reach is a daily metric, so a period is the sum of its days. Instagram keeps
-  daily insights for about 30 days, so a 30 day period cannot reach far enough
-  back for its own comparison; the app asks anyway and shows what comes back.
-- The long lived token (60 days) lives in SecureStore and is refreshed when it
-  is inside a week of running out.
+- Unified login, i.e. Facebook Login for Business. Meta closed "Instagram API
+  with Instagram Login" to new apps partway through this build, so the host is
+  `graph.facebook.com` and the login dialog takes a `config_id` instead of a
+  `scope`: the permission set lives in the configuration in Meta's dashboard,
+  not in our code. Changing permissions means editing that configuration.
+- Business and Creator accounts only. Personal accounts have no insights
+  through the API at all, which is why typing the numbers in by hand is a first
+  class path and not a fallback.
+- There is no Facebook Page in this setup, so `/me/accounts` comes back empty
+  and `/me` returns nothing useful. The account arrives through
+  `/me/assigned_instagram_accounts`; everything else hangs off that id.
+- Reach is asked for with `metric_type=total_value`, never as a sum of the
+  daily values: a person who looked twice in the period appears in two days,
+  so adding days up inflates the number. total_value is what Instagram shows
+  in its own Insights, which is what the user compares against.
+- The token from a business configuration is a system user token: it does not
+  expire and cannot be refreshed, so `expiresAt` 0 means "never" rather than
+  "expired". It lives in SecureStore.
+- Until App Review passes, only Instagram accounts added as testers in the app
+  (and accepted from inside Instagram) can connect.
 
 ## Later (agreed, not started)
 - Light theme and the "auto" setting. The prototype had a theme switcher; the

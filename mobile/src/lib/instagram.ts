@@ -1,8 +1,13 @@
-// Instagram API with Instagram Login (Business and Creator accounts only; a
-// personal account has no insights through the API at all, so manual entry
-// stays the other way in). The app holds a long lived token in SecureStore and
-// refreshes it itself: refresh_access_token takes no app secret. Only the code
-// exchange does, and that is what the backend is for.
+// Unified login (Facebook Login for Business). Meta closed the older
+// "Instagram API with Instagram Login" to new apps, so the host is
+// graph.facebook.com and the account is reached through the business assets
+// the user granted, not through a Facebook Page: there is no Page here and
+// /me/accounts comes back empty.
+//
+// Business and Creator accounts only. A personal account has no insights
+// through the API at all, so typing the numbers in by hand stays a first class
+// path. The token lives in SecureStore; the backend exists only for the code
+// exchange, which needs the app secret.
 
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -11,19 +16,19 @@ import { useSyncExternalStore } from "react";
 import { API_URL } from "./api";
 import type { Metrics } from "./diagnose";
 
-const GRAPH = "https://graph.instagram.com/v23.0";
-const KEY = "ig_token";
+const GRAPH = "https://graph.facebook.com/v23.0";
+const KEY = "ig_session";
 const REDIRECT = "whydrop://auth";
-/** Refresh once the token is inside a week of running out (they last 60 days). */
-const REFRESH_WINDOW = 7 * 24 * 3600 * 1000;
 
 export type Account = {
+  /** the Instagram professional account, not the Meta user */
   id: string;
   username: string;
   avatar: string | null;
   followers: number;
 };
 
+/** `expiresAt` 0 means a system user token, which does not expire. */
 type Session = { token: string; expiresAt: number; account: Account };
 
 let session: Session | null = null;
@@ -53,7 +58,6 @@ export async function loadSession(): Promise<void> {
     if (raw) session = JSON.parse(raw) as Session;
   } catch {}
   emit();
-  if (session) refreshIfStale().catch(() => {});
 }
 
 async function save(next: Session | null): Promise<void> {
@@ -67,8 +71,34 @@ export async function disconnect(): Promise<void> {
   await save(null);
 }
 
-/** Opens the Instagram sheet and comes back with an account, or null if the
- *  user closed it. Throws with a readable message when Instagram refuses. */
+async function get<T>(path: string, token: string): Promise<T> {
+  const sep = path.includes("?") ? "&" : "?";
+  const r = await fetch(`${GRAPH}${path}${sep}access_token=${token}`);
+  const body = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(body?.error?.message || `Instagram ответил ${r.status}`);
+  return body as T;
+}
+
+/** The granted business assets hold the Instagram account; there is no Page. */
+async function fetchAccount(token: string): Promise<Account> {
+  const assigned = await get<{ data?: { id: string }[] }>("/me/assigned_instagram_accounts", token);
+  const id = assigned.data?.[0]?.id;
+  if (!id) throw new Error("Instagram не передал аккаунт. Проверь, что он профессиональный.");
+
+  const p = await get<{ username?: string; profile_picture_url?: string; followers_count?: number }>(
+    `/${id}?fields=id,username,profile_picture_url,followers_count`,
+    token,
+  );
+  return {
+    id,
+    username: p.username ?? "",
+    avatar: p.profile_picture_url ?? null,
+    followers: p.followers_count ?? 0,
+  };
+}
+
+/** Opens the Meta sheet and comes back with an account, or null if the user
+ *  closed it. Throws with a readable message when Meta refuses. */
 export async function connect(): Promise<Account | null> {
   if (!API_URL) throw new Error("Бэкенд не настроен: нет EXPO_PUBLIC_API_URL.");
   const res = await WebBrowser.openAuthSessionAsync(`${API_URL}/api/instagram/start`, REDIRECT);
@@ -78,81 +108,63 @@ export async function connect(): Promise<Account | null> {
   const error = params.get("error");
   if (error) throw new Error(decodeURIComponent(error));
   const token = params.get("token");
+  if (!token) throw new Error("Meta не вернула токен.");
   const expires = Number(params.get("expires") || 0);
-  if (!token) throw new Error("Instagram не вернул токен.");
 
   const account = await fetchAccount(token);
-  await save({ token, expiresAt: Date.now() + expires * 1000, account });
+  await save({ token, expiresAt: expires ? Date.now() + expires * 1000 : 0, account });
   return account;
-}
-
-async function refreshIfStale(): Promise<void> {
-  if (!session) return;
-  if (session.expiresAt - Date.now() > REFRESH_WINDOW) return;
-  const r = await get<{ access_token: string; expires_in: number }>(
-    `${GRAPH}/refresh_access_token?grant_type=ig_refresh_token&access_token=${session.token}`,
-  );
-  await save({ ...session, token: r.access_token, expiresAt: Date.now() + r.expires_in * 1000 });
-}
-
-async function get<T>(url: string): Promise<T> {
-  const r = await fetch(url);
-  const body = await r.json().catch(() => null);
-  if (!r.ok) {
-    const msg = body?.error?.message || `Instagram ответил ${r.status}`;
-    throw new Error(msg);
-  }
-  return body as T;
-}
-
-async function fetchAccount(token: string): Promise<Account> {
-  const r = await get<{ id: string; username: string; profile_picture_url?: string; followers_count?: number }>(
-    `${GRAPH}/me?fields=id,username,profile_picture_url,followers_count&access_token=${token}`,
-  );
-  return {
-    id: r.id,
-    username: r.username,
-    avatar: r.profile_picture_url ?? null,
-    followers: r.followers_count ?? 0,
-  };
 }
 
 const day = 24 * 3600 * 1000;
 const stamp = (d: Date) => Math.floor(d.getTime() / 1000);
 
-/** Reach is a daily metric, so a period is the sum of its days. */
-async function reach(token: string, from: Date, to: Date): Promise<number> {
-  const r = await get<{ data: { values: { value: number }[] }[] }>(
-    `${GRAPH}/me/insights?metric=reach&period=day&since=${stamp(from)}&until=${stamp(to)}&access_token=${token}`,
+/**
+ * Unique reach over a period.
+ *
+ * Deliberately `metric_type=total_value` and not the sum of the daily values:
+ * someone who looked on Monday and again on Wednesday is in both days, so
+ * adding days up inflates the figure. total_value is the number Instagram
+ * itself shows in Insights, which is the number the user will compare against.
+ */
+async function reach(id: string, token: string, from: Date, to: Date): Promise<number> {
+  const r = await get<{ data?: { total_value?: { value?: number } }[] }>(
+    `/${id}/insights?metric=reach&period=day&metric_type=total_value&since=${stamp(from)}&until=${stamp(to)}`,
+    token,
   );
-  const values = r.data?.[0]?.values ?? [];
-  return values.reduce((sum, v) => sum + (v.value || 0), 0);
+  return r.data?.[0]?.total_value?.value ?? 0;
 }
 
 /**
  * Everything the diagnosis needs, for the chosen number of days and the same
- * stretch before it. Instagram only keeps daily insights for about 30 days,
- * so a 30 day period cannot reach far enough back for its own comparison.
+ * stretch before it. Instagram keeps daily insights for about 30 days, so a 30
+ * day period cannot reach far enough back for its own comparison; the request
+ * goes out anyway and whatever comes back is what the user sees.
  */
 export async function fetchMetrics(days: number): Promise<Metrics> {
   if (!session) throw new Error("Instagram не подключён.");
-  await refreshIfStale();
-  const token = session.token;
+  const { token, account } = session;
 
   const now = new Date();
   const start = new Date(now.getTime() - days * day);
   const prevStart = new Date(now.getTime() - days * 2 * day);
 
-  const [reachNow, reachPrev, media] = await Promise.all([
-    reach(token, start, now),
-    reach(token, prevStart, start),
-    get<{ data: { media_product_type?: string; like_count?: number; timestamp: string }[] }>(
-      `${GRAPH}/me/media?fields=media_product_type,like_count,timestamp&limit=100&access_token=${token}`,
+  const [reachNow, reachPrev, media, profile] = await Promise.all([
+    reach(account.id, token, start, now),
+    reach(account.id, token, prevStart, start),
+    get<{ data?: { media_product_type?: string; like_count?: number; timestamp: string }[] }>(
+      `/${account.id}/media?fields=media_product_type,like_count,timestamp&limit=100`,
+      token,
     ),
+    get<{ followers_count?: number }>(`/${account.id}?fields=followers_count`, token),
   ]);
 
   const inPeriod = (media.data ?? []).filter((m) => new Date(m.timestamp).getTime() >= start.getTime());
   const likes = inPeriod.reduce((sum, m) => sum + (m.like_count || 0), 0);
+  const followers = profile.followers_count ?? account.followers;
+
+  // the follower count moves, so keep the stored account in step with it
+  if (followers !== account.followers) await save({ ...session, account: { ...account, followers } });
 
   return {
     now: reachNow,
@@ -160,6 +172,6 @@ export async function fetchMetrics(days: number): Promise<Metrics> {
     posts: inPeriod.length,
     reels: inPeriod.filter((m) => m.media_product_type === "REELS").length,
     likes: inPeriod.length ? Math.round(likes / inPeriod.length) : 0,
-    followers: session.account.followers,
+    followers,
   };
 }
