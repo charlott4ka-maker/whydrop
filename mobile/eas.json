@@ -16,14 +16,14 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://whydrop.vercel.app"
+        "EXPO_PUBLIC_API_URL": "https://whydrop-phi.vercel.app"
       }
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://whydrop.vercel.app"
+        "EXPO_PUBLIC_API_URL": "https://whydrop-phi.vercel.app"
       }
     }
   }
