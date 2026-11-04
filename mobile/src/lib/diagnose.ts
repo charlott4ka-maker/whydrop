@@ -36,7 +36,18 @@ export function diagnose(m: Metrics): Diagnosis {
   const falling = ch <= -5;
 
   let d: Omit<Diagnosis, "change" | "falling">;
-  if (!falling) {
+  if (!m.prev) {
+    // nothing to compare against: saying "no drop" here would be an answer,
+    // and a wrong one, where the honest reply is that we cannot tell yet
+    d = {
+      title: "Не с чем сравнить",
+      why: "За прошлый период нет данных об охвате, а диагноз строится на сравнении двух периодов.",
+      actions: [
+        "Подожди, пока пройдёт ещё один такой же период.",
+        "Или возьми период покороче в профиле: за неделю данные обычно уже есть.",
+      ],
+    };
+  } else if (!falling) {
     d = {
       title: ch > 5 ? "Охват растёт" : "Падения нет",
       why: "Изменение в пределах нормальных колебаний. Рано делать выводы по одному периоду.",

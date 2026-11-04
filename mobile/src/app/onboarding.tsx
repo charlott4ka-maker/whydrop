@@ -1,8 +1,6 @@
 // Three pages, flipped with a swipe (the dots and the button follow). Shown
 // once: the flag lands in AsyncStorage and the root layout stops routing here.
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Dimensions, type DimensionValue, ScrollView, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -11,8 +9,8 @@ import Svg, { Path } from "react-native-svg";
 
 import { Pill, Txt } from "../components/ui";
 import { haptic } from "../lib/haptics";
+import { setPref } from "../lib/prefs";
 import { C } from "../theme/tokens";
-import { ONBOARDED } from "./_layout";
 
 const { width } = Dimensions.get("window");
 
@@ -101,14 +99,15 @@ const PAGES = [
 
 export default function Onboarding() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const [page, setPage] = useState(0);
   const scroller = useRef<ScrollView>(null);
 
+  // flipping the pref moves the gate in the root layout, which swaps this
+  // screen for the tabs; navigating by hand would aim at a screen the gate
+  // has not mounted yet
   const finish = () => {
     haptic("success");
-    AsyncStorage.setItem(ONBOARDED, "1").catch(() => {});
-    router.replace("/(tabs)");
+    setPref("onboarded", true);
   };
 
   const next = () => {

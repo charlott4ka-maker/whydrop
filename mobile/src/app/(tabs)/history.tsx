@@ -4,7 +4,7 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { Clock } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { InstagramGlyph } from "../../components/InstagramGlyph";
@@ -60,9 +60,10 @@ export default function HistoryScreen() {
           </View>
         ) : (
           <>
-            <Txt className="px-1 pb-1 text-[14px] text-t2">Сохранённые диагнозы. Данные остаются на этом устройстве.</Txt>
+            <Txt className="px-1 pb-1 text-[14px] text-t2">Сохранённые диагнозы. Данные остаются на этом устройстве, удалить можно долгим нажатием.</Txt>
             {items.map((e) => (
-              <Card key={e.id} className="flex-row items-center gap-3 p-4" onPress={() => confirmRemove(e)}>
+              <Pressable key={e.id} onLongPress={() => confirmRemove(e)} delayLongPress={400}>
+                <Card className="flex-row items-center gap-3 p-4">
                 <View className="flex-1">
                   <Txt numberOfLines={1} className="font-m700">{e.title}</Txt>
                   <View className="mt-1 flex-row items-center gap-1.5">
@@ -80,7 +81,8 @@ export default function HistoryScreen() {
                     {e.change > 0 ? "+" : ""}{e.change}%
                   </Txt>
                 </View>
-              </Card>
+                </Card>
+              </Pressable>
             ))}
           </>
         )}

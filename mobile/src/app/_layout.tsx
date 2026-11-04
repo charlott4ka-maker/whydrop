@@ -2,7 +2,6 @@ import "react-native-url-polyfill/auto";
 import "../global.css";
 import "../lib/nativewindInterop";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DarkTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -11,12 +10,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ToastHost } from "../components/Toast";
 import { loadSession } from "../lib/instagram";
-import { loadPrefs } from "../lib/prefs";
+import { loadPrefs, usePrefs } from "../lib/prefs";
 import { C } from "../theme/tokens";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
-
-export const ONBOARDED = "onboarded";
 
 const theme = {
   ...DarkTheme,
@@ -27,11 +24,12 @@ export default function RootLayout() {
   // prefs are read synchronously later on (haptics), so they load before the
   // first screen; the session decides whether the profile tab shows an account
   const [ready, setReady] = useState(false);
-  const [onboarded, setOnboarded] = useState(false);
+  // from the prefs store, not local state: finishing the intro has to move
+  // the gate, and a useState here would never hear about it
+  const { onboarded } = usePrefs();
 
   useEffect(() => {
-    Promise.all([loadPrefs(), loadSession(), AsyncStorage.getItem(ONBOARDED)])
-      .then(([, , seen]) => setOnboarded(seen === "1"))
+    Promise.all([loadPrefs(), loadSession()])
       .catch(() => {})
       .finally(() => {
         setReady(true);

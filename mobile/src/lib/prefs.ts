@@ -7,12 +7,14 @@ import { useSyncExternalStore } from "react";
 export type Period = "7" | "14" | "30";
 
 export type Prefs = {
+  /** the three intro pages are shown once */
+  onboarded: boolean;
   period: Period;
   saveHistory: boolean;
   haptics: boolean;
 };
 
-const DEFAULTS: Prefs = { period: "7", saveHistory: true, haptics: true };
+const DEFAULTS: Prefs = { onboarded: false, period: "7", saveHistory: true, haptics: true };
 const KEY = "prefs";
 
 let prefs: Prefs = DEFAULTS;

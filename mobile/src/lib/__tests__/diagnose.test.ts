@@ -53,6 +53,14 @@ describe("diagnose", () => {
     for (const m of cases) expect(diagnose(m).actions).toHaveLength(2);
   });
 
+  it("refuses to judge without a previous period", () => {
+    const d = diagnose({ ...healthy, prev: 0 });
+    expect(d.title).toBe("Не с чем сравнить");
+    // the fall rules must not get a say: there is no comparison to fall from
+    expect(d.why).not.toContain("Reels");
+    expect(d.actions).toHaveLength(2);
+  });
+
   it("survives an account with no followers", () => {
     expect(() => diagnose({ ...healthy, followers: 0, likes: 0 })).not.toThrow();
   });
