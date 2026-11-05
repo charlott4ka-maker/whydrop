@@ -12,7 +12,7 @@ export default function TabsLayout() {
     <NativeTabs tintColor={C.lime} blurEffect="systemThickMaterialDark" disableTransparentOnScrollEdge minimizeBehavior="never">
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Icon sf={{ default: "waveform.path.ecg", selected: "waveform.path.ecg" }} />
-        <NativeTabs.Trigger.Label>Диагноз</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Разбор</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="history">
         <NativeTabs.Trigger.Icon sf={{ default: "clock", selected: "clock.fill" }} />

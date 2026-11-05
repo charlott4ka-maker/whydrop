@@ -45,6 +45,9 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.bg } }}>
           <Stack.Protected guard={onboarded}>
             <Stack.Screen name="(tabs)" />
+            {/* результат приходит поверх вкладки и закрывается крестиком:
+                форма под ним остаётся на месте */}
+            <Stack.Screen name="result" options={{ presentation: "fullScreenModal", animation: "slide_from_bottom" }} />
           </Stack.Protected>
           <Stack.Protected guard={!onboarded}>
             <Stack.Screen name="onboarding" />

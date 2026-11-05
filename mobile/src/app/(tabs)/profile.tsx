@@ -1,9 +1,10 @@
-// Profile: the connected Instagram account at the top, the app's settings
-// under it. Connecting is optional on purpose, because only Business and
-// Creator accounts can be connected at all, so the form stays the way in.
+// Профиль: подключённый аккаунт сверху, настройки под ним. Подключение
+// необязательно: статистика через API есть только у Business и Creator, так что
+// ручная форма остаётся полноценным путём, а не запасным.
 
+import Constants from "expo-constants";
 import { Image } from "expo-image";
-import { Save, Trash2, Vibrate } from "lucide-react-native";
+import { BookOpen, Lock, Save, Trash2, Vibrate } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,24 +14,22 @@ import { SettingsCell, SettingsGroup } from "../../components/SettingsList";
 import { TabBarFade } from "../../components/TabBarFade";
 import { TabHeader } from "../../components/TabHeader";
 import { toast } from "../../components/Toast";
-import { Card, Pill, Segmented, Txt } from "../../components/ui";
+import { Card, Pill, Segmented, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
 import { clearHistory } from "../../lib/history";
-import { connect, disconnect, useAccount } from "../../lib/instagram";
-import { setPref, usePrefs, type Period } from "../../lib/prefs";
+import { comparableFromApi, connect, disconnect, useAccount } from "../../lib/instagram";
+import { PERIODS } from "../../lib/period";
+import { setPref, usePrefs } from "../../lib/prefs";
 import { C } from "../../theme/tokens";
 
-const PERIODS: [Period, string][] = [
-  ["7", "Неделя"],
-  ["14", "2 недели"],
-  ["30", "Месяц"],
-];
+const VERSION = Constants.expoConfig?.version ?? "1.0.0";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const prefs = usePrefs();
   const account = useAccount();
   const [busy, setBusy] = useState(false);
+  const [privacy, setPrivacy] = useState(false);
 
   const onConnect = async () => {
     setBusy(true);
@@ -57,13 +56,14 @@ export default function ProfileScreen() {
         onPress: () => {
           disconnect().catch(() => {});
           haptic("warning");
+          toast.info("Instagram отключён");
         },
       },
     ]);
   };
 
   const onClearHistory = () => {
-    Alert.alert("Очистить историю?", "Все сохранённые диагнозы будут удалены.", [
+    Alert.alert("Очистить историю?", "Все сохранённые разборы будут удалены. Отменить это нельзя.", [
       { text: "Отмена", style: "cancel" },
       {
         text: "Очистить",
@@ -76,6 +76,13 @@ export default function ProfileScreen() {
       },
     ]);
   };
+
+  const replayIntro = () => {
+    haptic("light");
+    setPref("onboarded", false);
+  };
+
+  const apiPeriodWarning = account && !comparableFromApi(Number(prefs.period));
 
   return (
     <View className="flex-1 bg-bg">
@@ -91,7 +98,7 @@ export default function ProfileScreen() {
               </View>
             )}
             <Txt numberOfLines={1} className="mt-4 font-m800 text-[22px]">@{account.username}</Txt>
-            <Txt className="mt-1 text-[14.5px] text-t2">
+            <Txt className="mt-1 text-[14.5px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
               {account.followers.toLocaleString("ru-RU")} подписчиков
             </Txt>
             <View className="mt-5 w-full">
@@ -119,10 +126,15 @@ export default function ProfileScreen() {
           <Txt className="mb-3 px-4 font-m600 text-[13px] uppercase text-t2" style={{ letterSpacing: 0.4 }}>
             Период по умолчанию
           </Txt>
-          <Segmented neutral options={PERIODS} value={prefs.period} onChange={(p) => setPref("period", p)} fill={C.card} />
+          <Segmented options={PERIODS} value={prefs.period} onChange={(p) => setPref("period", p)} neutral fill={C.card} />
           <Txt className="mt-3 px-4 text-[12.5px] leading-[18px] text-t3">
-            Сколько дней сравнивает диагноз: выбранный период против такого же перед ним.
+            Сколько дней сравнивает разбор: выбранный период против такого же перед ним.
           </Txt>
+          {apiPeriodWarning ? (
+            <Txt className="mt-2 px-4 text-[12.5px] leading-[18px]" style={{ color: C.danger }}>
+              За месяц Instagram не отдаёт прошлый период: статистика хранится около 30 дней. Кнопка «Подтянуть» вернёт нули в прошлом охвате.
+            </Txt>
+          ) : null}
         </View>
 
         <SettingsGroup title="Приложение">
@@ -140,8 +152,35 @@ export default function ProfileScreen() {
           />
           <SettingsCell icon={Trash2} tint="#FF5A6E" label="Очистить историю" destructive onPress={onClearHistory} />
         </SettingsGroup>
+
+        <SettingsGroup title="О приложении" footer={"whydrop " + VERSION}>
+          <SettingsCell icon={BookOpen} tint="#3DF2EE" label="Как это работает" onPress={replayIntro} />
+          <SettingsCell icon={Lock} tint="#636366" label="Конфиденциальность" onPress={() => setPrivacy(true)} />
+        </SettingsGroup>
       </ScrollView>
       <TabBarFade />
+      <PrivacySheet visible={privacy} onClose={() => setPrivacy(false)} />
     </View>
+  );
+}
+
+function PrivacySheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const blocks: [string, string][] = [
+    ["Что хранится на телефоне", "Разборы, настройки и токен Instagram лежат только на этом устройстве. Токен в защищённом хранилище системы, остальное в памяти приложения."],
+    ["Что уходит наружу", "Только запросы к Instagram за твоей же статистикой и один запрос к нашему серверу в момент подключения: он нужен, чтобы обменять код авторизации на токен, и ничего не сохраняет."],
+    ["Чего мы не делаем", "Не собираем аналитику, не показываем рекламу, не передаём данные третьим лицам и не видим твои цифры: они не покидают телефон."],
+    ["Как всё удалить", "«Очистить историю» стирает разборы, «Отключить» удаляет токен. Удаление приложения уносит всё остальное."],
+  ];
+  return (
+    <Sheet visible={visible} title="Конфиденциальность" onClose={onClose}>
+      <View className="gap-5">
+        {blocks.map(([t, b]) => (
+          <View key={t}>
+            <Txt className="font-m700 text-[16px]">{t}</Txt>
+            <Txt className="mt-1.5 text-[14.5px] leading-5 text-t2">{b}</Txt>
+          </View>
+        ))}
+      </View>
+    </Sheet>
   );
 }

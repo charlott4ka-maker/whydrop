@@ -3,6 +3,7 @@
 
 import { useRef, useState } from "react";
 import { Dimensions, type DimensionValue, ScrollView, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
@@ -56,8 +57,8 @@ const PAGES = [
     ),
   },
   {
-    title: "30 секунд вместо форумов",
-    sub: "Без статей из интернета. Короткая форма, понятный диагноз.",
+    title: "Минута вместо форумов",
+    sub: "Без статей из интернета. Короткая форма, понятная причина.",
     art: (
       <>
         <View className="flex-row flex-wrap gap-2">
@@ -65,7 +66,7 @@ const PAGES = [
           <Tag kind="mute">Статьи</Tag>
           <Tag kind="cyan">Короткая форма</Tag>
         </View>
-        <Txt className="font-m800" style={{ fontSize: 72, letterSpacing: -3 }}>30 с</Txt>
+        <Txt className="font-m800" style={{ fontSize: 72, letterSpacing: -3 }}>1 мин</Txt>
         <View className="gap-2.5">
           <Bar w="90%" />
           <Bar w="70%" />
@@ -76,7 +77,7 @@ const PAGES = [
   },
   {
     title: "Смотри историю",
-    sub: "Диагнозы сохраняются на устройстве.",
+    sub: "Разборы сохраняются на устройстве.",
     art: (
       <>
         <View className="self-start">
@@ -84,8 +85,8 @@ const PAGES = [
         </View>
         {[
           ["Мало публикаций", "−34%", C.danger],
-          ["Нормальные колебания", "−3%", C.ok],
-          ["Нет Reels", "+8%", C.ok],
+          ["Падения нет", "−3%", C.ok],
+          ["Нет Reels", "−18%", C.danger],
         ].map(([label, value, color]) => (
           <View key={label as string} className="flex-row items-center justify-between rounded-[18px] bg-bg px-4 py-3.5">
             <Txt className="font-m600">{label as string}</Txt>
@@ -120,7 +121,7 @@ export default function Onboarding() {
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
       <View className="h-11 flex-row items-center justify-end px-5">
         {page < PAGES.length - 1 ? (
-          <Txt className="px-2.5 py-2.5 font-m600 text-t2" onPress={finish}>Пропустить</Txt>
+          <Txt className="px-3 py-3 font-m600 text-t2" accessibilityRole="button" onPress={finish}>Пропустить</Txt>
         ) : null}
       </View>
 
@@ -133,24 +134,33 @@ export default function Onboarding() {
       >
         {PAGES.map((p) => (
           <View key={p.title} style={{ width }} className="px-5">
-            <View className="h-[330px] justify-center gap-3.5 overflow-hidden rounded-[32px] bg-card p-[22px]">{p.art}</View>
+            <View>
+              {/* мягкий лаймовый отсвет из-под карточки, как тень от экрана */}
+              <LinearGradient
+                pointerEvents="none"
+                colors={["rgba(200,255,74,0.16)", "rgba(200,255,74,0)"]}
+                style={{ position: "absolute", left: 24, right: 24, bottom: -14, height: 56, borderRadius: 28 }}
+              />
+              <View className="h-[330px] justify-center gap-3.5 overflow-hidden rounded-[32px] bg-card p-[22px]">{p.art}</View>
+            </View>
           </View>
         ))}
       </ScrollView>
 
-      <View className="flex-row justify-center gap-1.5 py-6">
+      {/* полоса из трёх сегментов: видно не только где ты, но и сколько осталось */}
+      <View className="flex-row gap-1.5 px-5 py-6">
         {PAGES.map((p, i) => (
           <View
             key={p.title}
-            className="h-2 rounded-full"
-            style={{ width: i === page ? 26 : 8, backgroundColor: i === page ? C.lime : C.card2 }}
+            className="h-1 flex-1 rounded-full"
+            style={{ backgroundColor: i <= page ? C.lime : C.card2 }}
           />
         ))}
       </View>
 
       <Animated.View key={page} entering={FadeIn.duration(220)} className="flex-1 px-5">
-        <Txt className="font-m800 text-[30px]" style={{ letterSpacing: -0.6, lineHeight: 34 }}>{PAGES[page].title}</Txt>
-        <Txt className="mt-3 text-[17px] leading-6 text-t2">{PAGES[page].sub}</Txt>
+        <Txt className="font-m800 text-[34px]" style={{ letterSpacing: -1, lineHeight: 38 }}>{PAGES[page].title}</Txt>
+        <Txt className="mt-3 text-[18px] leading-[25px] text-t2">{PAGES[page].sub}</Txt>
       </Animated.View>
 
       <View className="px-5" style={{ paddingBottom: insets.bottom + 16 }}>

@@ -184,7 +184,7 @@ export function GlassCircle({ size = H.sm, onPress, label, children, system = tr
 // The same glass as the round buttons on the screens.
 export function CloseButton({ onPress }: { onPress: () => void }) {
   return (
-    <GlassCircle onPress={onPress} label="Close">
+    <GlassCircle onPress={onPress} label="Закрыть">
       <X size={18} color={C.t1} />
     </GlassCircle>
   );

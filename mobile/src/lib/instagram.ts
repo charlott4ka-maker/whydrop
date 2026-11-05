@@ -71,11 +71,37 @@ export async function disconnect(): Promise<void> {
   await save(null);
 }
 
+/** Токен отозвали или он протух: сессию держать нет смысла. */
+export class RevokedError extends Error {
+  constructor() {
+    super("Доступ к Instagram отозван. Подключи аккаунт заново в профиле.");
+    this.name = "RevokedError";
+  }
+}
+
+/** Meta отвечает по-английски; показываем человеку то, что можно прочитать. */
+function readable(err: { code?: number; type?: string; message?: string } | null, status: number): Error {
+  if (err?.code === 190 || err?.type === "OAuthException") return new RevokedError();
+  if (err?.code === 4 || err?.code === 17 || err?.code === 32) {
+    return new Error("Instagram ограничил частоту запросов. Попробуй через несколько минут.");
+  }
+  if (err?.code === 10 || err?.code === 200) {
+    return new Error("Не хватает разрешений. Переподключи аккаунт в профиле.");
+  }
+  if (status >= 500) return new Error("Instagram сейчас не отвечает. Попробуй позже.");
+  return new Error("Не получилось забрать статистику. Попробуй ещё раз.");
+}
+
 async function get<T>(path: string, token: string): Promise<T> {
   const sep = path.includes("?") ? "&" : "?";
-  const r = await fetch(`${GRAPH}${path}${sep}access_token=${token}`);
+  let r: Response;
+  try {
+    r = await fetch(`${GRAPH}${path}${sep}access_token=${token}`);
+  } catch {
+    throw new Error("Нет связи с интернетом.");
+  }
   const body = await r.json().catch(() => null);
-  if (!r.ok) throw new Error(body?.error?.message || `Instagram ответил ${r.status}`);
+  if (!r.ok) throw readable(body?.error ?? null, r.status);
   return body as T;
 }
 
@@ -144,6 +170,17 @@ async function reach(id: string, token: string, from: Date, to: Date): Promise<n
 export async function fetchMetrics(days: number): Promise<Metrics> {
   if (!session) throw new Error("Instagram не подключён.");
   const { token, account } = session;
+  try {
+    return await load(days, token, account);
+  } catch (e) {
+    // отозванный токен больше ничего не откроет: гасим сессию, чтобы профиль
+    // не показывал подключённый аккаунт, которым нельзя пользоваться
+    if (e instanceof RevokedError) await save(null);
+    throw e;
+  }
+}
+
+async function load(days: number, token: string, account: Account): Promise<Metrics> {
 
   const now = new Date();
   const start = new Date(now.getTime() - days * day);
@@ -164,7 +201,7 @@ export async function fetchMetrics(days: number): Promise<Metrics> {
   const followers = profile.followers_count ?? account.followers;
 
   // the follower count moves, so keep the stored account in step with it
-  if (followers !== account.followers) await save({ ...session, account: { ...account, followers } });
+  if (followers !== account.followers && session) await save({ ...session, account: { ...account, followers } });
 
   return {
     now: reachNow,
@@ -175,3 +212,11 @@ export async function fetchMetrics(days: number): Promise<Metrics> {
     followers,
   };
 }
+
+/**
+ * Instagram держит дневные инсайты около 30 дней, а разбору нужен ещё такой же
+ * период перед выбранным. Значит из API можно честно сравнить только периоды,
+ * удвоенная длина которых укладывается в это окно.
+ */
+export const INSIGHTS_WINDOW_DAYS = 30;
+export const comparableFromApi = (days: number) => days * 2 <= INSIGHTS_WINDOW_DAYS;

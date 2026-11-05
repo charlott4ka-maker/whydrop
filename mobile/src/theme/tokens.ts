@@ -10,10 +10,10 @@ export const C = {
   raised: "#242428",
   line: "rgba(255,255,255,0.08)",
   t1: "#FFFFFF",
-  t2: "#8E8E93",
-  t3: "#636366",
+  t2: "#9A9AA0",
+  t3: "#888890",
   /** placeholder (and the search glass) in inputs */
-  hint: "#6B6B73",
+  hint: "#7E7E87",
   /** the main action colour: lime on near-black, text on it is almost black */
   lime: "#C8FF4A",
   onLime: "#101400",
