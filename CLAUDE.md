@@ -41,7 +41,9 @@ rules below come from.
 - Tab bar: the system iOS tabs (`expo-router/unstable-native-tabs`, SF Symbols)
   with a thick dark material and a dark fade (`TabBarFade`) at the bottom of
   each tab screen, so content under the bar doesn't blend into it.
-- Modals are bottom sheets (`Sheet`); long forms are full screen.
+- Modals are bottom sheets (`Sheet`); long forms are full screen. The result
+  of a разбор is its own full screen modal route (`src/app/result.tsx`), so the
+  form underneath keeps the numbers that were typed into it.
 - Toasts: dark pill from the top with a filled round icon.
 - Empty states: centred in the free space, the same gap from the tile to the
   text as from the text to the button, the sub close under the title.
@@ -52,6 +54,13 @@ rules below come from.
   springs use `Press`.
 - No em/en dashes in UI copy, and no "(optional)" on labels.
 - Don't gender the user in UI copy: the app is for whoever installs it.
+
+## Words
+- The thing the app produces is a **разбор**, never a "диагноз": the old word
+  promised a doctor's verdict and declined badly. The button says "Узнать
+  причину", the tab says "Разбор".
+- Text sizes come from six steps: 13 / 15 / 16 / 17 / 18 / 19, plus the display
+  figures set in `style`. Don't introduce 14.5 or 12.5 again.
 
 ## The diagnosis (mobile/src/lib/diagnose.ts)
 - A short ladder of rules, deliberately not a model: the user needs one cause
@@ -82,7 +91,22 @@ rules below come from.
 - Until App Review passes, only Instagram accounts added as testers in the app
   (and accepted from inside Instagram) can connect.
 
+## Streak and analytics
+- The streak is computed from history (`mobile/src/lib/streak.ts`), never
+  stored: a stored counter drifts from what the person actually did and a
+  cleared history would leave it lying. A week counts if any разбор falls in
+  it, and the current week never breaks the streak while it is still running.
+- Analytics asks Instagram for each number separately and lets each one fail on
+  its own, because the breakdowns are the part of the Graph API most likely to
+  come back empty. Who unfollowed is impossible: Instagram gives that list to
+  nobody, and the screen says so rather than pretending.
+
 ## Later (agreed, not started)
+- A weekly reminder. It needs `expo-notifications`, which is a native module and
+  a new dev build, so it is not in yet.
+- Swipe to delete in the history. It needs `react-native-gesture-handler`, also
+  a native module; for now a tap opens the разбор and a long press deletes it,
+  with an undo in the toast.
 - Light theme and the "auto" setting. The prototype had a theme switcher; the
   app is dark only for now and the setting is not shown rather than shown dead.
 - Objects drifting behind the screens, and the setting that turns them off.
