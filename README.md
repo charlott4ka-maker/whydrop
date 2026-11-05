@@ -32,11 +32,16 @@ npx expo start
 ### 2. Приложение в Meta
 
 На [developers.facebook.com](https://developers.facebook.com) создать приложение,
-добавить продукт **Instagram** → «API setup with Instagram login».
+добавить продукт **Instagram** → «API setup with Unified login». Старый вариант
+«API setup with Instagram login» Meta закрыла для новых приложений, поэтому вход
+идёт через Facebook Login for Business, а набор разрешений задаёт конфигурация,
+а не запрос.
 
-- Записать **Instagram App ID** и **Instagram App Secret**
-- В «Business login settings» прописать redirect URI:
-  `https://<твой-домен>/api/instagram/callback`
+- Записать **App ID** и **App Secret** (`IG_CLIENT_ID`, `IG_CLIENT_SECRET`)
+- Создать конфигурацию входа и записать её **ID конфигурации** (`IG_CONFIG_ID`):
+  без него `/api/instagram/start` вернёт 500
+- В настройках конфигурации прописать redirect URI:
+  `https://<твой-домен>/api/instagram/callback` (Meta сверяет его побайтово)
 - В тестовые пользователи («Instagram testers») добавить свой аккаунт и
   принять приглашение в самом Instagram
 
@@ -50,6 +55,7 @@ npx expo start
 vercel link
 vercel env add IG_CLIENT_ID
 vercel env add IG_CLIENT_SECRET
+vercel env add IG_CONFIG_ID
 vercel deploy --prod
 ```
 
