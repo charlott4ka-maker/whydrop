@@ -19,12 +19,17 @@ rules below come from.
   endpoint must never be named that way.
 
 ## Layout
+- Two apps live here. `mobile/` is **whydrop**; `lastly/` is **Давно**, a second,
+  much smaller app (how long since you last did something). They share the design
+  system by copy, not by package: `src/components/ui.tsx`, `src/theme/tokens.ts`
+  and the Tailwind config are the same files in both. Change one and decide
+  whether the other needs it too; nothing syncs on its own.
 - `mobile/` is the Expo app. `api/` is two Vercel functions, and they exist for
   one reason: the OAuth code exchange needs the app secret, which cannot ship in
   a bundle. Everything else the app asks Instagram for itself, refresh included
   (`refresh_access_token` takes no secret).
 
-## UI rules (mobile/src)
+## UI rules (mobile/src, lastly/src)
 - Font: the iOS system font SF Pro, weights 500-800 only. Never Regular (400);
   `font-m500`..`font-m800` are the class names.
 - Buttons and controls come in exactly two heights: `H.lg` (52) and `H.sm` (40).
