@@ -4,8 +4,9 @@
 
 import Constants from "expo-constants";
 import { Image } from "expo-image";
-import { BookOpen, Lock, Save, Trash2, Vibrate } from "lucide-react-native";
-import { useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { BarChart3, BookOpen, ChevronRight, Flame, Lock, Save, Trash2, Vibrate } from "lucide-react-native";
+import { useCallback, useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,10 +17,11 @@ import { TabHeader } from "../../components/TabHeader";
 import { toast } from "../../components/Toast";
 import { Card, Pill, Segmented, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
-import { clearHistory } from "../../lib/history";
+import { clearHistory, readHistory, type Entry } from "../../lib/history";
 import { comparableFromApi, connect, disconnect, useAccount } from "../../lib/instagram";
 import { PERIODS } from "../../lib/period";
 import { setPref, usePrefs } from "../../lib/prefs";
+import { streak, weeksWord } from "../../lib/streak";
 import { C } from "../../theme/tokens";
 
 const VERSION = Constants.expoConfig?.version ?? "1.0.0";
@@ -28,8 +30,17 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const prefs = usePrefs();
   const account = useAccount();
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [privacy, setPrivacy] = useState(false);
+  const [items, setItems] = useState<Entry[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      readHistory().then(setItems).catch(() => {});
+    }, []),
+  );
+  const s = streak(items);
 
   const onConnect = async () => {
     setBusy(true);
@@ -98,7 +109,7 @@ export default function ProfileScreen() {
               </View>
             )}
             <Txt numberOfLines={1} className="mt-4 font-m800 text-[22px]">@{account.username}</Txt>
-            <Txt className="mt-1 text-[14.5px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
+            <Txt className="mt-1 text-[15px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
               {account.followers.toLocaleString("ru-RU")} подписчиков
             </Txt>
             <View className="mt-5 w-full">
@@ -111,7 +122,7 @@ export default function ProfileScreen() {
               <InstagramGlyph size={34} color={C.t1} />
             </View>
             <Txt className="mt-4 text-center font-m700 text-[19px]">Подключи Instagram</Txt>
-            <Txt className="mt-1.5 max-w-[300px] text-center text-[14.5px] leading-5 text-t2">
+            <Txt className="mt-1.5 max-w-[300px] text-center text-[15px] leading-5 text-t2">
               Охват, посты и подписчики подтянутся сами. Нужен профессиональный аккаунт, Business или Creator: у личного аккаунта статистика через Instagram закрыта.
             </Txt>
             <View className="mt-5 w-full">
@@ -127,15 +138,32 @@ export default function ProfileScreen() {
             Период по умолчанию
           </Txt>
           <Segmented options={PERIODS} value={prefs.period} onChange={(p) => setPref("period", p)} neutral fill={C.card} />
-          <Txt className="mt-3 px-4 text-[12.5px] leading-[18px] text-t3">
+          <Txt className="mt-3 px-4 text-[13px] leading-[18px] text-t3">
             Сколько дней сравнивает разбор: выбранный период против такого же перед ним.
           </Txt>
           {apiPeriodWarning ? (
-            <Txt className="mt-2 px-4 text-[12.5px] leading-[18px]" style={{ color: C.danger }}>
+            <Txt className="mt-2 px-4 text-[13px] leading-[18px]" style={{ color: C.danger }}>
               За месяц Instagram не отдаёт прошлый период: статистика хранится около 30 дней. Кнопка «Подтянуть» вернёт нули в прошлом охвате.
             </Txt>
           ) : null}
         </View>
+
+        <Card className="mb-8 flex-row items-center gap-3 p-4" onPress={() => router.push("/streak")}>
+          <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "rgba(200,255,74,0.16)" }}>
+            <Flame size={20} color={C.lime} absoluteStrokeWidth strokeWidth={2} />
+          </View>
+          <View className="flex-1">
+            <Txt className="font-m600 text-[15px]">Серия</Txt>
+            <Txt className="mt-0.5 text-[13px] text-t2">
+              {s.current > 0 ? `${s.current} ${weeksWord(s.current)} подряд` : "Начнётся с первого разбора"}
+            </Txt>
+          </View>
+          <ChevronRight size={20} color={C.t3} />
+        </Card>
+
+        <SettingsGroup title="Разборы">
+          <SettingsCell icon={BarChart3} tint="#3DF2EE" label="Аналитика" onPress={() => router.push("/analytics")} />
+        </SettingsGroup>
 
         <SettingsGroup title="Приложение">
           <SettingsCell
@@ -177,7 +205,7 @@ function PrivacySheet({ visible, onClose }: { visible: boolean; onClose: () => v
         {blocks.map(([t, b]) => (
           <View key={t}>
             <Txt className="font-m700 text-[16px]">{t}</Txt>
-            <Txt className="mt-1.5 text-[14.5px] leading-5 text-t2">{b}</Txt>
+            <Txt className="mt-1.5 text-[15px] leading-5 text-t2">{b}</Txt>
           </View>
         ))}
       </View>

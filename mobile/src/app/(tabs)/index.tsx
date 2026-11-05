@@ -3,9 +3,9 @@
 // вернуться, ничего не вводя заново.
 
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Info, RefreshCw } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,6 +16,7 @@ import { TabHeader } from "../../components/TabHeader";
 import { toast } from "../../components/Toast";
 import { Card, Pill, Sheet, Txt } from "../../components/ui";
 import { diagnose, type Metrics } from "../../lib/diagnose";
+import { takeDraft } from "../../lib/draft";
 import { haptic } from "../../lib/haptics";
 import { addEntry } from "../../lib/history";
 import { comparableFromApi, fetchMetrics, useAccount, type Account } from "../../lib/instagram";
@@ -43,6 +44,19 @@ export default function DiagnosisScreen() {
   // подписи полей завязаны на период: сменился период — старые ошибки
   // относятся уже не к тем числам
   useEffect(() => setErrors({}), [prefs.period]);
+
+  // «повторить с этими цифрами» из сохранённого разбора
+  useFocusEffect(
+    useCallback(() => {
+      const d = takeDraft();
+      if (!d) return;
+      setForm({
+        now: String(d.now), prev: String(d.prev), posts: String(d.posts),
+        reels: String(d.reels), likes: String(d.likes), followers: String(d.followers),
+      });
+      setErrors({});
+    }, []),
+  );
 
   const open = (m: Metrics, source: "manual" | "instagram") => {
     const d = diagnose(m);
@@ -147,7 +161,7 @@ function Connected({ account, pulling, onPull, warn }: { account: Account; pulli
         </Pill>
       </Card>
       {warn ? (
-        <Txt className="px-4 text-[12.5px] leading-[18px] text-t3">
+        <Txt className="px-4 text-[13px] leading-[18px] text-t3">
           За месяц Instagram не отдаёт прошлый период: статистика хранится около 30 дней. Для подтягивания выбери неделю или 2 недели.
         </Txt>
       ) : null}
@@ -170,7 +184,7 @@ function Banner({ onPress }: { onPress: () => void }) {
       </View>
       <View className="flex-1">
         <Txt className="font-m600 text-[17px] leading-[22px]">Откуда цифры</Txt>
-        <Txt className="mt-1 text-[14px] leading-[19px] text-t2">
+        <Txt className="mt-1 text-[15px] leading-[19px] text-t2">
           Instagram, раздел Insights. Или подключи аккаунт.
         </Txt>
       </View>
@@ -192,7 +206,7 @@ function HelpSheet({ visible, onClose, period }: { visible: boolean; onClose: ()
         {steps.map((s, i) => (
           <View key={s} className="flex-row items-start gap-3">
             <View className="h-[26px] w-[26px] items-center justify-center rounded-lg" style={{ backgroundColor: C.cyan }}>
-              <Txt className="font-m700 text-[14px]" style={{ color: C.onCyan }}>{i + 1}</Txt>
+              <Txt className="font-m700 text-[15px]" style={{ color: C.onCyan }}>{i + 1}</Txt>
             </View>
             <Txt className="flex-1 text-[15px] leading-[21px]">{s}</Txt>
           </View>

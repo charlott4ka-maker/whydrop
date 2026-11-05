@@ -21,7 +21,7 @@ const Tag = ({ children, kind }: { children: string; kind: "lime" | "cyan" | "mu
     style={{ backgroundColor: kind === "lime" ? C.lime : kind === "cyan" ? C.cyan : C.card2 }}
   >
     <Txt
-      className="font-m600 text-[13.5px]"
+      className="font-m600 text-[13px]"
       style={{ color: kind === "mute" ? C.t2 : kind === "lime" ? C.onLime : C.onCyan, textDecorationLine: kind === "mute" ? "line-through" : "none" }}
     >
       {children}

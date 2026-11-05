@@ -28,7 +28,7 @@ export function SettingsGroup({ title, footer, children }: { title?: string; foo
           </View>
         ))}
       </View>
-      {footer ? <Txt className="mt-3 px-4 text-[12.5px] leading-[18px] text-t3">{footer}</Txt> : null}
+      {footer ? <Txt className="mt-3 px-4 text-[13px] leading-[18px] text-t3">{footer}</Txt> : null}
     </View>
   );
 }

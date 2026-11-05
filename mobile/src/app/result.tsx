@@ -3,7 +3,7 @@
 // сохранённая запись из истории.
 
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Share2, Trash2 } from "lucide-react-native";
+import { RotateCcw, Share2, Trash2 } from "lucide-react-native";
 import { Alert, ScrollView, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -12,6 +12,7 @@ import { spaced } from "../components/NumList";
 import { toast } from "../components/Toast";
 import { diagnose, type Metrics } from "../lib/diagnose";
 import { haptic } from "../lib/haptics";
+import { setDraft } from "../lib/draft";
 import { removeEntry } from "../lib/history";
 import { compared, rows } from "../lib/period";
 import type { Period } from "../lib/prefs";
@@ -105,7 +106,7 @@ export default function ResultScreen() {
             {compared(period)}{p.at ? " · " + date(p.at) : ""}
           </Txt>
           <Txt className="mt-3 font-m700 text-[19px]">{d.title}</Txt>
-          <Txt className="mt-1.5 text-[14.5px] leading-5 text-t2">{d.why}</Txt>
+          <Txt className="mt-1.5 text-[15px] leading-5 text-t2">{d.why}</Txt>
         </Card>
 
         <Card className="px-[18px] py-1.5">
@@ -113,7 +114,7 @@ export default function ResultScreen() {
           {d.actions.map((a, i) => (
             <View key={a} className="flex-row items-start gap-3 py-3.5" style={{ borderTopWidth: 1, borderTopColor: C.line }}>
               <View className="h-[26px] w-[26px] items-center justify-center rounded-lg" style={{ backgroundColor: C.cyan }}>
-                <Txt className="font-m700 text-[14px]" style={{ color: C.onCyan }}>{i + 1}</Txt>
+                <Txt className="font-m700 text-[15px]" style={{ color: C.onCyan }}>{i + 1}</Txt>
               </View>
               <Txt className="flex-1 text-[15px] leading-[21px]">{a}</Txt>
             </View>
@@ -141,6 +142,19 @@ export default function ResultScreen() {
 
         <View className="gap-3">
           <Pill full kind="ghost" onPress={share} icon={<Share2 size={18} color={C.t1} />}>Поделиться</Pill>
+          {p.id ? (
+            <Pill
+              full
+              kind="ghost"
+              icon={<RotateCcw size={18} color={C.t1} />}
+              onPress={() => {
+                setDraft(m as Metrics);
+                router.replace("/(tabs)");
+              }}
+            >
+              Повторить с этими цифрами
+            </Pill>
+          ) : null}
           {p.id ? (
             <Pill full kind="ghost" onPress={drop} icon={<Trash2 size={18} color={C.danger} />}>
               <Txt className="font-m600 text-base text-danger">Удалить разбор</Txt>

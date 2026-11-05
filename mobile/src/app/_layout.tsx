@@ -48,6 +48,8 @@ export default function RootLayout() {
             {/* результат приходит поверх вкладки и закрывается крестиком:
                 форма под ним остаётся на месте */}
             <Stack.Screen name="result" options={{ presentation: "fullScreenModal", animation: "slide_from_bottom" }} />
+            <Stack.Screen name="streak" />
+            <Stack.Screen name="analytics" />
           </Stack.Protected>
           <Stack.Protected guard={!onboarded}>
             <Stack.Screen name="onboarding" />

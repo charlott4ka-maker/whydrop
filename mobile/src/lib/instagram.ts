@@ -220,3 +220,98 @@ async function load(days: number, token: string, account: Account): Promise<Metr
  */
 export const INSIGHTS_WINDOW_DAYS = 30;
 export const comparableFromApi = (days: number) => days * 2 <= INSIGHTS_WINDOW_DAYS;
+
+/* ------------------------------------------------------------------ */
+/* Аналитика аккаунта: пять чисел, а не стена плиток.                   */
+/* Каждое число берётся отдельным запросом и падает отдельно: если Meta */
+/* не отдала одну разбивку, остальные всё равно показываются.           */
+
+export type Analytics = {
+  days: number;
+  /** охват: подписчики против остальных */
+  audience: { followers: number; others: number } | null;
+  /** охват: Reels против всего остального */
+  format: { reels: number; rest: number } | null;
+  /** лайки и комментарии на пост, в процентах от подписчиков */
+  engagement: { percent: number; posts: number } | null;
+  /** подписки минус отписки за период */
+  follows: { gained: number; lost: number } | null;
+  /** три поста периода с наибольшим числом лайков */
+  top: { id: string; type: string; likes: number; comments: number; link?: string; thumb?: string }[];
+};
+
+type Breakdown = { dimension_values?: string[]; value?: number };
+
+async function breakdown(id: string, token: string, metric: string, dim: string, from: Date, to: Date): Promise<Map<string, number>> {
+  const r = await get<{ data?: { total_value?: { breakdowns?: { results?: Breakdown[] }[] } }[] }>(
+    `/${id}/insights?metric=${metric}&period=day&metric_type=total_value&breakdown=${dim}&since=${stamp(from)}&until=${stamp(to)}`,
+    token,
+  );
+  const out = new Map<string, number>();
+  for (const res of r.data?.[0]?.total_value?.breakdowns?.[0]?.results ?? []) {
+    const key = res.dimension_values?.[0];
+    if (key) out.set(key, (out.get(key) ?? 0) + (res.value ?? 0));
+  }
+  return out;
+}
+
+export async function fetchAnalytics(days: number): Promise<Analytics> {
+  if (!session) throw new Error("Instagram не подключён.");
+  const { token, account } = session;
+  const to = new Date();
+  const from = new Date(to.getTime() - days * day);
+  const id = account.id;
+
+  const soft = <T>(p: Promise<T>): Promise<T | null> =>
+    p.catch((e) => {
+      if (e instanceof RevokedError) throw e;
+      return null;
+    });
+
+  const [aud, fmt, fol, media] = await Promise.all([
+    soft(breakdown(id, token, "reach", "follower_type", from, to)),
+    soft(breakdown(id, token, "reach", "media_product_type", from, to)),
+    soft(breakdown(id, token, "follows_and_unfollows", "follow_type", from, to)),
+    soft(
+      get<{ data?: { id: string; media_product_type?: string; like_count?: number; comments_count?: number; permalink?: string; thumbnail_url?: string; media_url?: string; timestamp: string }[] }>(
+        `/${id}/media?fields=id,media_product_type,like_count,comments_count,permalink,thumbnail_url,media_url,timestamp&limit=100`,
+        token,
+      ),
+    ),
+  ]);
+
+  const pick = (m: Map<string, number> | null, keys: string[]) =>
+    m ? keys.reduce((sum, k) => sum + (m.get(k) ?? 0), 0) : 0;
+
+  const audience = aud
+    ? { followers: pick(aud, ["FOLLOWER"]), others: pick(aud, ["NON_FOLLOWER", "UNKNOWN"]) }
+    : null;
+
+  const format = fmt
+    ? { reels: pick(fmt, ["REEL", "REELS"]), rest: pick(fmt, ["POST", "FEED", "CAROUSEL_CONTAINER", "STORY", "IGTV", "AD"]) }
+    : null;
+
+  const follows = fol
+    ? { gained: pick(fol, ["FOLLOWER", "FOLLOWS"]), lost: pick(fol, ["UNFOLLOW", "UNFOLLOWS", "NON_FOLLOWER"]) }
+    : null;
+
+  const inPeriod = (media?.data ?? []).filter((m) => new Date(m.timestamp).getTime() >= from.getTime());
+  const interactions = inPeriod.reduce((s, m) => s + (m.like_count || 0) + (m.comments_count || 0), 0);
+  const engagement = inPeriod.length && account.followers
+    ? { percent: (interactions / inPeriod.length / account.followers) * 100, posts: inPeriod.length }
+    : null;
+
+  const top = [...inPeriod]
+    .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
+    .slice(0, 3)
+    .map((m) => ({
+      id: m.id,
+      type: m.media_product_type === "REELS" ? "Reels" : "Пост",
+      likes: m.like_count ?? 0,
+      comments: m.comments_count ?? 0,
+      link: m.permalink,
+      thumb: m.thumbnail_url ?? m.media_url,
+    }));
+
+  return { days, audience, format, engagement, follows, top };
+}

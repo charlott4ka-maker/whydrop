@@ -103,7 +103,7 @@ export default function HistoryScreen() {
                     <Txt numberOfLines={1} className="font-m700">{e.title}</Txt>
                     <View className="mt-1 flex-row items-center gap-1.5">
                       {e.source === "instagram" ? <InstagramGlyph size={13} color={C.t3} /> : null}
-                      <Txt className="text-[13.5px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
+                      <Txt className="text-[13px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
                         {WORDS[e.period].short} · {when(e.at)} · охват {e.reach.toLocaleString("ru-RU")}
                       </Txt>
                     </View>
@@ -112,7 +112,7 @@ export default function HistoryScreen() {
                     className="rounded-xl px-2.5 py-1.5"
                     style={{ backgroundColor: e.change <= -5 ? "rgba(255,90,110,0.16)" : "rgba(79,224,160,0.16)" }}
                   >
-                    <Txt className="font-m700 text-[14px]" style={{ fontVariant: ["tabular-nums"], color: e.change <= -5 ? C.danger : C.ok }}>
+                    <Txt className="font-m700 text-[15px]" style={{ fontVariant: ["tabular-nums"], color: e.change <= -5 ? C.danger : C.ok }}>
                       {e.change > 0 ? "+" : ""}{e.change}%
                     </Txt>
                   </View>

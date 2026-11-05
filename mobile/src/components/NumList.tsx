@@ -57,7 +57,7 @@ export function NumList<K extends string>({
                 <View className="flex-1">
                   <Txt className="text-[15px] leading-5">{r.label}</Txt>
                   {sub ? (
-                    <Txt className="mt-1 text-[12.5px] leading-4" style={{ color: error ? C.danger : C.t3 }}>
+                    <Txt className="mt-1 text-[13px] leading-4" style={{ color: error ? C.danger : C.t3 }}>
                       {sub}
                     </Txt>
                   ) : null}

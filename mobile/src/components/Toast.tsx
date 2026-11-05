@@ -102,7 +102,7 @@ export function ToastHost({ inSheet }: { inSheet?: boolean }) {
             }}
             className="h-9 justify-center rounded-full bg-card2 px-3.5"
           >
-            <Txt className="font-m700 text-[14px] text-cyan">{item.action.label}</Txt>
+            <Txt className="font-m700 text-[15px] text-cyan">{item.action.label}</Txt>
           </Pressable>
         ) : null}
       </Pressable>

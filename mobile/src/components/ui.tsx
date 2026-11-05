@@ -247,7 +247,7 @@ export function Empty({ icon: Icon, title, sub, action, compact, fill }: { icon:
       </LinearGradient>
       {/* the same space above the text (from the tile) and below it (to the button); the sub sits close to the title */}
       <Txt className={`${compact && !fill ? "mt-4" : "mt-6"} text-center font-m700 ${compact ? "text-base" : "text-lg"}`}>{title}</Txt>
-      {sub ? <Txt className="mt-1 max-w-[280px] text-center text-[14.5px] leading-5 text-t2">{sub}</Txt> : null}
+      {sub ? <Txt className="mt-1 max-w-[280px] text-center text-[15px] leading-5 text-t2">{sub}</Txt> : null}
       {action ? <View className={fill ? "mt-6" : compact ? "mt-4" : "mt-6"}>{action}</View> : null}
     </View>
     </Animated.View>
@@ -285,7 +285,7 @@ export function Field({
         // fontSize only: a line height (text-base sets 24) pushes iOS input text down
         style={{ borderWidth: 1, borderColor: error ? C.danger : focus ? C.cyan : "transparent", textAlignVertical: multiline ? "top" : "center", paddingTop: multiline ? 14 : 0, paddingBottom: multiline ? 14 : 0 }}
       />
-      {error ? <Txt className="mt-1.5 px-4 text-[12.5px] text-danger">{error}</Txt> : null}
+      {error ? <Txt className="mt-1.5 px-4 text-[13px] text-danger">{error}</Txt> : null}
     </View>
   );
 }
