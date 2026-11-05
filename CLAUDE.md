@@ -85,6 +85,9 @@ rules below come from.
 ## Later (agreed, not started)
 - Light theme and the "auto" setting. The prototype had a theme switcher; the
   app is dark only for now and the setting is not shown rather than shown dead.
-- The moving blurred blobs behind the screens, and the setting that turns them
-  off.
-- App icon and splash are still Wishpool's artwork.
+- Objects drifting behind the screens, and the setting that turns them off.
+  Glossy inflated 3D shapes on the near-black page, slowly floating back and
+  forth under the content: a crown, a pair of glasses, several pale blue stars
+  and one star that runs green into blue. They sit far enough back that text
+  over them still reads; the earlier idea of blurred colour blobs is replaced
+  by these.
