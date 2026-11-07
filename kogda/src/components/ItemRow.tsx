@@ -8,7 +8,7 @@ import { StyleSheet, View } from "react-native";
 
 import { daysOf, lastMark, status, type Item } from "../lib/items";
 import type { View as ViewKind } from "../lib/prefs";
-import { ago, dateLabel, rough } from "../lib/time";
+import { ago, dateLabel, dateShort, rough } from "../lib/time";
 import { C } from "../theme/tokens";
 import { Card, GlassCircle, Txt } from "./ui";
 
@@ -72,7 +72,7 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
         <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginVertical: 12 }} />
         <View className="flex-row items-center justify-between gap-2">
           <Txt numberOfLines={1} className="flex-1 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
-            {last ? dateLabel(last.at) : "нет отметок"}
+            {last ? dateShort(last.at) : "нет отметок"}
           </Txt>
           <GlassCircle size={40} onPress={onDone} label={"Отметить: " + item.title}>
             <Check size={20} color={C.t1} />

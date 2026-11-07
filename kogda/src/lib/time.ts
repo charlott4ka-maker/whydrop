@@ -62,6 +62,16 @@ export function everyLabel(days: number): string {
 
 const MONTHS = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 
+/** «12.10», с годом, когда он другой: в плитке на слова места нет. */
+export function dateShort(iso: string, now: Date = new Date()): string {
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return d.getFullYear() === now.getFullYear()
+    ? `${dd}.${mm}`
+    : `${dd}.${mm}.${String(d.getFullYear()).slice(2)}`;
+}
+
 /** «4 ноября», с годом, если это был не этот год. */
 export function dateLabel(iso: string, now: Date = new Date()): string {
   const d = new Date(iso);
