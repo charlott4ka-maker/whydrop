@@ -118,8 +118,9 @@ rules below come from.
   skipped year does not rewrite what "usually" means. A hand-set interval always
   wins over the guessed one.
 - The one reward the app allows itself is the counter running down to zero when
-  you mark something (`components/Counter.tsx`), and a soft glow of its own
-  colour on an overdue number. Nothing else celebrates, and nothing nags.
+  you mark something (`components/Counter.tsx`). Nothing else celebrates, and
+  nothing nags. No glow behind text: a text shadow under a big figure reads as
+  dirt around it, not as light. Colour alone marks what is overdue.
 - A due date written into the title ("Меняла линзы раз в месяц") is taken out of
   it on save: the person already said it, asking them to repeat it with a chip
   is a wasted step.

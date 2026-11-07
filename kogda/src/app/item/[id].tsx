@@ -128,9 +128,6 @@ export default function ItemScreen() {
                     style={{
                       fontSize: 56, letterSpacing: -2, fontVariant: ["tabular-nums"],
                       color: st === "due" ? C.lime : C.t1,
-                      ...(st === "due"
-                        ? { textShadowColor: "rgba(200,255,74,0.45)", textShadowRadius: 24, textShadowOffset: { width: 0, height: 0 } }
-                        : null),
                     }}
                   />
                   <Txt className="text-[17px] text-t2">{a.unit}</Txt>

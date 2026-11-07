@@ -19,11 +19,6 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
   const a = ago(days);
   const st = status(item);
   const accent = st === "due" ? C.lime : C.t1;
-  // просроченное число светится своим цветом: на тёмном это читается как
-  // подсветка, а не как ещё одно яркое пятно
-  const glow = st === "due"
-    ? { textShadowColor: "rgba(200,255,74,0.45)", textShadowRadius: 18, textShadowOffset: { width: 0, height: 0 } }
-    : null;
   const last = lastMark(item);
   const open = () => router.push(`/item/${item.id}`);
 
@@ -49,7 +44,7 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
           <Counter
             value={days}
             className="font-m700"
-            style={{ fontSize: 19, color: accent, fontVariant: ["tabular-nums"], minWidth: 44, textAlign: "right", ...glow }}
+            style={{ fontSize: 19, color: accent, fontVariant: ["tabular-nums"], minWidth: 44, textAlign: "right" }}
           />
         )}
         <GlassCircle size={40} onPress={onDone} label={"Отметить: " + item.title}>
@@ -75,7 +70,7 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
             <Counter
               value={days}
               className="font-m800"
-              style={{ fontSize: 30, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"], ...glow }}
+              style={{ fontSize: 30, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"] }}
             />
             <Txt className="text-[13px] text-t2">{a.unit}</Txt>
           </View>
@@ -115,7 +110,7 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
             <Counter
               value={days}
               className="font-m800"
-              style={{ fontSize: 34, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"], ...glow }}
+              style={{ fontSize: 34, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"] }}
             />
             <Txt className="text-[15px] text-t2">{a.unit}</Txt>
           </View>
