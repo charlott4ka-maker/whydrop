@@ -141,12 +141,20 @@ function Row({ item, onDone, onEdit }: { item: Item; onDone: () => void; onEdit:
     <Card className="flex-row items-center gap-3 p-4" onPress={onEdit}>
       <View className="flex-1">
         <Txt numberOfLines={1} className="text-[15px] text-t2">{item.title}</Txt>
-        <View className="mt-1 flex-row items-baseline gap-2">
-          <Txt className="font-m800" style={{ fontSize: 34, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"] }}>
-            {a.value}
+        {days === null ? (
+          // крупное тире вместо числа читается как случайная чёрточка, поэтому
+          // «ещё ни разу» пишем словами и помельче
+          <Txt className="mt-1 font-m700" style={{ fontSize: 20, letterSpacing: -0.2, color: accent }}>
+            Ещё ни разу
           </Txt>
-          <Txt className="text-[15px] text-t2">{a.unit}</Txt>
-        </View>
+        ) : (
+          <View className="mt-1 flex-row items-baseline gap-2">
+            <Txt className="font-m800" style={{ fontSize: 34, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"] }}>
+              {a.value}
+            </Txt>
+            <Txt className="text-[15px] text-t2">{a.unit}</Txt>
+          </View>
+        )}
         {r ? <Txt className="mt-0.5 text-[13px] text-t3">{r}</Txt> : null}
         {st === "due" && item.everyDays ? (
           <View className="mt-2 self-start rounded-full px-2.5 py-1" style={{ backgroundColor: "rgba(200,255,74,0.16)" }}>
