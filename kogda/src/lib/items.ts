@@ -293,3 +293,48 @@ export async function clearAll(): Promise<void> {
 export async function restoreAll(items: Item[]): Promise<Item[]> {
   return write(items);
 }
+
+/* ------------------------------ копия ------------------------------ */
+
+const BACKUP = "kogda";
+const BACKUP_V = 1;
+
+/**
+ * Копия как текст, а не как файл: текст уходит в заметки, в телеграм, куда
+ * угодно, и возвращается вставкой. Это единственный способ не потерять
+ * историю вместе с телефоном, пока у приложения нет облака.
+ */
+export function exportBackup(items: Item[]): string {
+  return JSON.stringify({ app: BACKUP, v: BACKUP_V, at: new Date().toISOString(), items }, null, 1);
+}
+
+/** Разбор вставленной копии. null, если это не она: лучше ничего, чем каша. */
+export function parseBackup(text: string): Item[] | null {
+  let data: unknown;
+  try {
+    data = JSON.parse(text.trim());
+  } catch {
+    return null;
+  }
+  const raw = Array.isArray(data)
+    ? data
+    : data && typeof data === "object" && (data as { app?: string }).app === BACKUP
+      ? (data as { items?: unknown }).items
+      : null;
+  if (!Array.isArray(raw)) return null;
+
+  const ok = raw.filter(
+    (i): i is Legacy =>
+      Boolean(i) && typeof i === "object" &&
+      typeof (i as Legacy).id === "string" &&
+      typeof (i as Legacy).title === "string",
+  );
+  if (!ok.length) return null;
+  // через ту же миграцию, что и чтение: копия может быть от старой версии
+  return migrate(ok);
+}
+
+/** Заменить всё содержимое списком из копии. */
+export async function replaceAll(items: Item[]): Promise<Item[]> {
+  return write(items);
+}

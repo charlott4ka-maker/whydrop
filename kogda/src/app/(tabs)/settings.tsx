@@ -3,16 +3,19 @@
 
 import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
-import { BookOpen, Lock, Trash2, Vibrate } from "lucide-react-native";
+import { BookOpen, Download, Lock, Share2, Trash2, Vibrate } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, ScrollView, Share, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SettingsCell, SettingsGroup } from "../../components/SettingsList";
 import { toast } from "../../components/Toast";
-import { Card, ScreenTitle, Sheet, Txt } from "../../components/ui";
+import { Card, Field, Pill, ScreenTitle, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
-import { clearAll, daysOf, expected, readItems, restoreAll, status, type Item } from "../../lib/items";
+import {
+  clearAll, daysOf, expected, exportBackup, parseBackup, readItems, replaceAll, restoreAll, status,
+  type Item,
+} from "../../lib/items";
 import { setPref, usePrefs } from "../../lib/prefs";
 import { daysWord, everyLabel } from "../../lib/time";
 import { C } from "../../theme/tokens";
@@ -25,6 +28,8 @@ export default function SettingsScreen() {
   const prefs = usePrefs();
   const [items, setItems] = useState<Item[]>([]);
   const [privacy, setPrivacy] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [paste, setPaste] = useState("");
 
   useFocusEffect(
     useCallback(() => {
@@ -56,6 +61,48 @@ export default function SettingsScreen() {
     ]);
   };
 
+  const backup = async () => {
+    if (!items.length) return toast.info("Пока нечего сохранять");
+    haptic("light");
+    try {
+      await Share.share({ message: exportBackup(items) });
+    } catch {}
+  };
+
+  const restore = () => {
+    const read = parseBackup(paste);
+    if (!read) {
+      haptic("error");
+      toast.error("Это не похоже на копию");
+      return;
+    }
+    setRestoring(false);
+    setPaste("");
+    Alert.alert(
+      "Восстановить копию?",
+      `В копии ${read.length}. Сейчас в списке ${items.length}. Текущий список будет заменён.`,
+      [
+        { text: "Отмена", style: "cancel" },
+        {
+          text: "Восстановить",
+          onPress: () => {
+            const gone = items;
+            replaceAll(read)
+              .then(setItems)
+              .then(() =>
+                toast.success("Восстановлено", {
+                  action: { label: "Отменить", onPress: () => replaceAll(gone).then(setItems).catch(() => {}) },
+                  duration: 6000,
+                }),
+              )
+              .catch(() => {});
+            haptic("success");
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <View className="flex-1">
       <ScrollView
@@ -66,6 +113,14 @@ export default function SettingsScreen() {
         <ScreenTitle title="Настройки" />
 
         <Stats items={items} onOpen={(id) => router.push(`/item/${id}`)} />
+
+        <SettingsGroup
+          title="Данные"
+          footer="Копия это обычный текст: отправь его себе в заметки или в чат, а потом вставь обратно. Пока у приложения нет облака, это единственный способ не потерять историю вместе с телефоном."
+        >
+          <SettingsCell icon={Share2} tint="#5468F0" label="Сохранить копию" onPress={backup} />
+          <SettingsCell icon={Download} tint="#636366" label="Восстановить из копии" onPress={() => setRestoring(true)} />
+        </SettingsGroup>
 
         <SettingsGroup title="Приложение">
           <SettingsCell
@@ -92,6 +147,21 @@ export default function SettingsScreen() {
       </ScrollView>
 
       <PrivacySheet visible={privacy} onClose={() => setPrivacy(false)} />
+
+      <Sheet visible={restoring} title="Восстановить из копии" onClose={() => setRestoring(false)}>
+        <Field
+          label="Вставь сюда текст копии"
+          value={paste}
+          onChangeText={setPaste}
+          placeholder={'{ "app": "kogda", ... }'}
+          autoCapitalize="none"
+          multiline
+        />
+        <Txt className="mb-6 text-[13px] leading-[18px] text-t3">
+          Текущий список будет заменён целиком. Перед заменой приложение спросит ещё раз и покажет, сколько пунктов в копии.
+        </Txt>
+        <Pill full onPress={restore}>Проверить копию</Pill>
+      </Sheet>
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import {
-  addItem, byCategory, clearAll, dueCount, expected, moveMark, nextDue, orderBy, parseEvery, readItems,
-  sortItems, status, typicalInterval, type Item,
+  addItem, byCategory, clearAll, dueCount, expected, exportBackup, moveMark, nextDue, orderBy,
+  parseBackup, parseEvery, readItems, sortItems, status, typicalInterval, type Item,
 } from "../items";
 
 const now = new Date("2026-11-07T12:00:00");
@@ -202,5 +202,38 @@ describe("moveMark", () => {
     const [saved] = await readItems();
     const next = await moveMark(saved.id, ago(999), ago(1));
     expect(next[0].marks[0].at).toBe(saved.marks[0].at);
+  });
+});
+
+describe("backup", () => {
+  const sample = [item("Меняла линзы", [10, 40], 30), item("Звонила бабушке", [3])];
+
+  it("survives a round trip", () => {
+    expect(parseBackup(exportBackup(sample))).toEqual(sample);
+  });
+
+  it("accepts a bare array, the way an older copy was written", () => {
+    expect(parseBackup(JSON.stringify(sample))?.[0].title).toBe("Меняла линзы");
+  });
+
+  it("brings a copy from the version that kept one date instead of a history", () => {
+    const old = JSON.stringify([{ id: "x", title: "Стирала шторы", lastAt: ago(50) }]);
+    const read = parseBackup(old);
+    expect(read?.[0].marks).toHaveLength(1);
+    expect(read?.[0].category).toBe("other");
+  });
+
+  it("refuses anything that is not a copy rather than importing mush", () => {
+    expect(parseBackup("")).toBeNull();
+    expect(parseBackup("привет")).toBeNull();
+    expect(parseBackup("{}")).toBeNull();
+    expect(parseBackup("[]")).toBeNull();
+    expect(parseBackup(JSON.stringify([{ nope: 1 }]))).toBeNull();
+    expect(parseBackup(JSON.stringify({ app: "other", items: sample }))).toBeNull();
+  });
+
+  it("drops the broken rows and keeps the rest", () => {
+    const mixed = JSON.stringify({ app: "kogda", v: 1, items: [sample[0], { junk: true }] });
+    expect(parseBackup(mixed)).toHaveLength(1);
   });
 });

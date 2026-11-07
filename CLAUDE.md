@@ -124,6 +124,13 @@ rules below come from.
 - A due date written into the title ("Меняла линзы раз в месяц") is taken out of
   it on save: the person already said it, asking them to repeat it with a chip
   is a wasted step.
+- No push notifications, deliberately. A "time to change your lenses" push is
+  exactly the nagging the app exists to avoid; the widget is the on-brand answer,
+  because the person looks at it rather than being interrupted.
+- The backup is text, not a file: `exportBackup` hands the whole list to the
+  share sheet and `parseBackup` takes it back from a paste. It needs no native
+  module, and until there is a cloud it is the only thing standing between a
+  lost phone and years of history.
 - It is not a habit tracker and must never nag. It answers a question the person
   already has, which is why there are no goals, no streaks and no guilt.
 

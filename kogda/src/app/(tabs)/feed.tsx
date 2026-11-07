@@ -3,47 +3,26 @@
 // вообще успела за октябрь. С приписками к отметкам это уже дневник.
 
 import { useFocusEffect, useRouter } from "expo-router";
-import { CalendarDays } from "lucide-react-native";
+import { CalendarDays, Search } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Card, Empty, ScreenTitle, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
-import { readItems, type Item, type Mark } from "../../lib/items";
+import { feedGroups } from "../../lib/feed";
+import { readItems, type Item } from "../../lib/items";
 import { dateLabel, marksWord } from "../../lib/time";
 import { C } from "../../theme/tokens";
 
-const MONTHS = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
-
-type Row = Mark & { title: string; id: string };
-type Group = { key: string; title: string; rows: Row[] };
-
-/** Отметки всех пунктов, свежие сверху, разложенные по месяцам. */
-function groups(items: Item[], now = new Date()): Group[] {
-  const all: Row[] = [];
-  for (const i of items) for (const m of i.marks) all.push({ ...m, title: i.title, id: i.id });
-  all.sort((a, b) => +new Date(b.at) - +new Date(a.at));
-
-  const out: Group[] = [];
-  for (const r of all) {
-    const d = new Date(r.at);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
-    let g = out.find((x) => x.key === key);
-    if (!g) {
-      const year = d.getFullYear() === now.getFullYear() ? "" : ` ${d.getFullYear()}`;
-      g = { key, title: MONTHS[d.getMonth()] + year, rows: [] };
-      out.push(g);
-    }
-    g.rows.push(r);
-  }
-  return out;
-}
+/** Поиск появляется, когда листать становится дольше, чем искать. */
+const BUSY = 12;
 
 export default function FeedScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [items, setItems] = useState<Item[] | null>(null);
+  const [query, setQuery] = useState("");
 
   useFocusEffect(
     useCallback(() => {
@@ -51,17 +30,38 @@ export default function FeedScreen() {
     }, []),
   );
 
-  const list = items ? groups(items) : [];
+  const all = items ?? [];
+  const total = all.reduce((n, i) => n + i.marks.length, 0);
+  const list = feedGroups(all, query);
 
   return (
     <ScrollView
       className="flex-1"
       contentContainerStyle={{ padding: 16, paddingTop: insets.top + 8, paddingBottom: insets.bottom + 120, gap: 24 }}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
     >
       <ScreenTitle title="Лента" />
 
-      {items === null ? null : list.length === 0 ? (
+      {total >= BUSY ? (
+        <View className="h-lg flex-row items-center gap-3 rounded-full bg-card px-4">
+          <Search size={18} color={C.t3} absoluteStrokeWidth strokeWidth={1.8} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Найти по названию или заметке"
+            placeholderTextColor={C.hint}
+            returnKeyType="search"
+            className="flex-1 font-m500 text-t1"
+            style={{ fontSize: 16 }}
+          />
+        </View>
+      ) : null}
+
+      {items === null ? null : list.length === 0 && query.trim() ? (
+        <Txt className="px-1 pt-4 text-[15px] text-t3">Ничего не нашлось.</Txt>
+      ) : list.length === 0 ? (
         <View className="pt-6">
           <Empty
             icon={CalendarDays}
