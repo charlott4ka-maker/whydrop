@@ -43,6 +43,12 @@ rules below come from.
 - Icons: lucide-react-native, 1.5px stroke (`absoluteStrokeWidth`) in small
   round buttons, even sizes so they sit dead centre. lucide dropped its brand
   icons, so the Instagram mark is our own `InstagramGlyph`.
+- **Never draw an icon by hand.** Take the geometry from lucide, even outside
+  the app: in Figma, in a web mock-up, anywhere. Hand-drawn ones come out
+  subtly wrong and nobody notices until they look broken on a phone. The exact
+  paths are in `node_modules/lucide-react-native/dist/esm/icons/<name>.mjs`
+  under `__iconData.node`, so there is never a reason to guess them. The only
+  exception is a mark lucide does not carry at all, like the Instagram glyph.
 - Tab bar: the system iOS tabs (`expo-router/unstable-native-tabs`, SF Symbols)
   with a thick dark material and a dark fade (`TabBarFade`) at the bottom of
   each tab screen, so content under the bar doesn't blend into it.
