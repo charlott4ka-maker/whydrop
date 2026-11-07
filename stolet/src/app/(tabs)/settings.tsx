@@ -132,7 +132,7 @@ export default function SettingsScreen() {
           <SettingsCell icon={Trash2} tint="#FF5A6E" label="Удалить все пункты" destructive onPress={wipe} />
         </SettingsGroup>
 
-        <SettingsGroup title="О приложении" footer={"Когда " + VERSION}>
+        <SettingsGroup title="О приложении" footer={"Сто лет " + VERSION}>
           <SettingsCell
             icon={BookOpen}
             tint="#5468F0"

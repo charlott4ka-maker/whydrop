@@ -19,7 +19,7 @@ rules below come from.
   endpoint must never be named that way.
 
 ## Layout
-- Two apps live here. `mobile/` is **whydrop**; `kogda/` is **Когда**, a second,
+- Two apps live here. `mobile/` is **whydrop**; `stolet/` is **Сто лет**, a second,
   much smaller app (how long since you last did something). They share the design
   system by copy, not by package: `src/components/ui.tsx`, `src/theme/tokens.ts`
   and the Tailwind config are the same files in both. Change one and decide
@@ -29,7 +29,7 @@ rules below come from.
   a bundle. Everything else the app asks Instagram for itself, refresh included
   (`refresh_access_token` takes no secret).
 
-## UI rules (mobile/src, kogda/src)
+## UI rules (mobile/src, stolet/src)
 - Font: the iOS system font SF Pro, weights 500-800 only. Never Regular (400);
   `font-m500`..`font-m800` are the class names.
 - Buttons and controls come in exactly two heights: `H.lg` (52) and `H.sm` (40).
@@ -107,7 +107,7 @@ rules below come from.
 - Until App Review passes, only Instagram accounts added as testers in the app
   (and accepted from inside Instagram) can connect.
 
-## Когда (kogda/)
+## Сто лет (stolet/)
 - Three tabs on the **system** tab bar, so iOS 26 gives it real Liquid Glass
   instead of an imitation. Glass goes on the floating navigation layer only,
   never on cards: Apple's own guidance, and glass on glass turns to mush.
@@ -127,6 +127,10 @@ rules below come from.
 - No push notifications, deliberately. A "time to change your lenses" push is
   exactly the nagging the app exists to avoid; the widget is the on-brand answer,
   because the person looks at it rather than being interrupted.
+- The widget lives in `targets/widget/` and gets dates, not day counts: it
+  refreshes on its own timeline, so a precomputed number would freeze at the day
+  the app was last opened. `src/lib/widget.ts` writes the top three into the app
+  group from `write()`, the one place the list ever changes.
 - The backup is text, not a file: `exportBackup` hands the whole list to the
   share sheet and `parseBackup` takes it back from a paste. It needs no native
   module, and until there is a cloud it is the only thing standing between a

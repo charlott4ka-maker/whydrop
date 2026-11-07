@@ -189,6 +189,10 @@ export async function readItems(): Promise<Item[]> {
 
 async function write(items: Item[]): Promise<Item[]> {
   await AsyncStorage.setItem(KEY, JSON.stringify(items)).catch(() => {});
+  // единственное место, где список меняется, значит и единственное, откуда
+  // виджету стоит сообщать об этом
+  const { syncWidget } = require("./widget") as typeof import("./widget");
+  syncWidget(items);
   return items;
 }
 

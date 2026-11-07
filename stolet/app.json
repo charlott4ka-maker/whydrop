@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Когда",
-    "slug": "kogda",
-    "scheme": "kogda",
+    "name": "Сто лет",
+    "slug": "sto-let",
+    "scheme": "stolet",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
     "backgroundColor": "#0B0B0C",
     "primaryColor": "#C8FF4A",
     "ios": {
-      "bundleIdentifier": "app.kogda.ios",
+      "bundleIdentifier": "app.stolet.ios",
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
@@ -18,7 +18,11 @@
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
         "CFBundleLocalizations": ["ru"]
-      }
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.app.stolet.ios"]
+      },
+      "appleTeamId": "ЗАМЕНИ_НА_TEAM_ID"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -26,6 +30,7 @@
     },
     "plugins": [
       "expo-router",
+      "@bacons/apple-targets",
       "expo-font",
       [
         "expo-splash-screen",
