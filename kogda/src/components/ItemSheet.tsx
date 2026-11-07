@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 
 import { haptic } from "../lib/haptics";
-import { addItem, CATEGORIES, updateItem, type CategoryId, type Item } from "../lib/items";
+import { addItem, CATEGORIES, parseEvery, updateItem, type CategoryId, type Item } from "../lib/items";
+import { everyLabel } from "../lib/time";
+import { toast } from "./Toast";
 import { Chip, Field, Pill, Sheet, Txt } from "./ui";
 
 /** «Приложение само» значит, что срок не задан и мы смотрим на привычку. */
@@ -53,10 +55,15 @@ export function ItemSheet({
     }
     haptic("light");
     const clean = note.trim() || undefined;
+    // срок, написанный прямо в названии, вынимаем оттуда: человек и так его
+    // сказал, незачем просить повторить тапом по чипу
+    const read = every ? { title: title.trim() } : parseEvery(title);
+    const days = every ?? read.everyDays;
     const p = current
-      ? updateItem(current.id, { title: title.trim(), category, everyDays: every, note: clean })
-      : addItem(title, { category, everyDays: every, note: clean });
+      ? updateItem(current.id, { title: read.title, category, everyDays: days, note: clean })
+      : addItem(read.title, { category, everyDays: days, note: clean });
     p.then(onSaved).catch(() => {});
+    if (!every && read.everyDays) toast.info("Срок распознан: " + everyLabel(read.everyDays));
     onClose();
   };
 

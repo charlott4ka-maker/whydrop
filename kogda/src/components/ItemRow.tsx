@@ -10,6 +10,7 @@ import { daysOf, lastMark, status, type Item } from "../lib/items";
 import type { View as ViewKind } from "../lib/prefs";
 import { ago, dateLabel, dateShort, rough } from "../lib/time";
 import { C } from "../theme/tokens";
+import { Counter } from "./Counter";
 import { Card, GlassCircle, Txt } from "./ui";
 
 export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; onDone: () => void }) {
@@ -18,6 +19,11 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
   const a = ago(days);
   const st = status(item);
   const accent = st === "due" ? C.lime : C.t1;
+  // просроченное число светится своим цветом: на тёмном это читается как
+  // подсветка, а не как ещё одно яркое пятно
+  const glow = st === "due"
+    ? { textShadowColor: "rgba(200,255,74,0.45)", textShadowRadius: 18, textShadowOffset: { width: 0, height: 0 } }
+    : null;
   const last = lastMark(item);
   const open = () => router.push(`/item/${item.id}`);
 
@@ -37,12 +43,15 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
             <Txt className="font-m600 text-[13px]" style={{ color: C.lime }}>Пора</Txt>
           </View>
         ) : null}
-        <Txt
-          className="font-m700"
-          style={{ fontSize: 19, color: accent, fontVariant: ["tabular-nums"], minWidth: 44, textAlign: "right" }}
-        >
-          {days === null ? "—" : days}
-        </Txt>
+        {days === null ? (
+          <Txt className="font-m700" style={{ fontSize: 19, color: accent, minWidth: 44, textAlign: "right" }}>—</Txt>
+        ) : (
+          <Counter
+            value={days}
+            className="font-m700"
+            style={{ fontSize: 19, color: accent, fontVariant: ["tabular-nums"], minWidth: 44, textAlign: "right", ...glow }}
+          />
+        )}
         <GlassCircle size={40} onPress={onDone} label={"Отметить: " + item.title}>
           <Check size={20} color={C.t1} />
         </GlassCircle>
@@ -63,9 +72,11 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
           <Txt className="mt-2 font-m700 text-[17px]" style={{ color: accent }}>Ещё ни разу</Txt>
         ) : (
           <View className="mt-2 flex-row items-baseline gap-2">
-            <Txt className="font-m800" style={{ fontSize: 30, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"] }}>
-              {a.value}
-            </Txt>
+            <Counter
+              value={days}
+              className="font-m800"
+              style={{ fontSize: 30, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"], ...glow }}
+            />
             <Txt className="text-[13px] text-t2">{a.unit}</Txt>
           </View>
         )}
@@ -101,9 +112,11 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
           </Txt>
         ) : (
           <View className="mt-1 flex-row items-baseline gap-2">
-            <Txt className="font-m800" style={{ fontSize: 34, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"] }}>
-              {a.value}
-            </Txt>
+            <Counter
+              value={days}
+              className="font-m800"
+              style={{ fontSize: 34, letterSpacing: -1, color: accent, fontVariant: ["tabular-nums"], ...glow }}
+            />
             <Txt className="text-[15px] text-t2">{a.unit}</Txt>
           </View>
         )}

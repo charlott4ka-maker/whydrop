@@ -1,5 +1,6 @@
 import {
-  byCategory, dueCount, expected, nextDue, orderBy, sortItems, status, typicalInterval, type Item,
+  byCategory, dueCount, expected, nextDue, orderBy, parseEvery, sortItems, status, typicalInterval,
+  type Item,
 } from "../items";
 
 const now = new Date("2026-11-07T12:00:00");
@@ -158,5 +159,29 @@ describe("nextDue", () => {
   it("predicts nothing without an interval or without a mark", () => {
     expect(nextDue(item("шторы", [212]))).toBeNull();
     expect(nextDue(item("щётка", [], 90))).toBeNull();
+  });
+});
+
+describe("parseEvery", () => {
+  it("reads the interval people actually write", () => {
+    expect(parseEvery("Меняла линзы раз в месяц")).toEqual({ title: "Меняла линзы", everyDays: 30 });
+    expect(parseEvery("Стирала шторы раз в полгода")).toEqual({ title: "Стирала шторы", everyDays: 180 });
+    expect(parseEvery("Была у врача раз в год")).toEqual({ title: "Была у врача", everyDays: 365 });
+    expect(parseEvery("Меняла фильтр каждые 3 месяца")).toEqual({ title: "Меняла фильтр", everyDays: 90 });
+    expect(parseEvery("Поливала цветы каждые 10 дней")).toEqual({ title: "Поливала цветы", everyDays: 10 });
+    expect(parseEvery("Чистила ноутбук, раз в 2 недели")).toEqual({ title: "Чистила ноутбук", everyDays: 14 });
+  });
+
+  it("leaves a plain title alone", () => {
+    expect(parseEvery("Звонила бабушке")).toEqual({ title: "Звонила бабушке" });
+    expect(parseEvery("  Мыла окна  ")).toEqual({ title: "Мыла окна" });
+  });
+
+  it("refuses when nothing would be left of the title", () => {
+    expect(parseEvery("раз в месяц")).toEqual({ title: "раз в месяц" });
+  });
+
+  it("refuses absurd numbers rather than trusting a typo", () => {
+    expect(parseEvery("Меняла масло каждые 90 лет")).toEqual({ title: "Меняла масло каждые 90 лет" });
   });
 });

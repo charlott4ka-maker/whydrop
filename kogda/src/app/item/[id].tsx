@@ -9,13 +9,14 @@ import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Calendar } from "../../components/Calendar";
+import { Counter } from "../../components/Counter";
 import { ItemSheet } from "../../components/ItemSheet";
 import { toast } from "../../components/Toast";
 import { Card, Field, GlassCircle, Pill, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
 import {
-  CATEGORIES, daysAgoIso, daysOf, expected, mark, nextDue, readItems, removeItem, setMarkNote,
-  status, typicalInterval, unmark, type Item, type Mark,
+  CATEGORIES, daysAgoIso, daysOf, expected, mark, nextDue, readItems, removeItem, restoreItem,
+  setMarkNote, status, typicalInterval, unmark, type Item, type Mark,
 } from "../../lib/items";
 import { ago, dateLabel, daysSince, daysWord, everyLabel, marksWord, nextLabel, rough } from "../../lib/time";
 import { C } from "../../theme/tokens";
@@ -121,12 +122,17 @@ export default function ItemScreen() {
                 </Txt>
               ) : (
                 <View className="mt-1 flex-row items-baseline gap-2">
-                  <Txt
+                  <Counter
+                    value={days}
                     className="font-m800"
-                    style={{ fontSize: 56, letterSpacing: -2, color: st === "due" ? C.lime : C.t1, fontVariant: ["tabular-nums"] }}
-                  >
-                    {a.value}
-                  </Txt>
+                    style={{
+                      fontSize: 56, letterSpacing: -2, fontVariant: ["tabular-nums"],
+                      color: st === "due" ? C.lime : C.t1,
+                      ...(st === "due"
+                        ? { textShadowColor: "rgba(200,255,74,0.45)", textShadowRadius: 24, textShadowOffset: { width: 0, height: 0 } }
+                        : null),
+                    }}
+                  />
                   <Txt className="text-[17px] text-t2">{a.unit}</Txt>
                 </View>
               )}
@@ -230,8 +236,21 @@ export default function ItemScreen() {
               full
               kind="ghost"
               onPress={() => {
+                // удаление уносит с собой всю историю отметок, поэтому отмена
+                // тут нужна не меньше, чем в списке
+                if (!item) return;
+                const gone = item;
                 haptic("warning");
-                removeItem(id).then(() => router.back()).catch(() => {});
+                removeItem(id)
+                  .then(() => {
+                    router.back();
+                    toast.info("Удалено", {
+                      action: { label: "Отменить", onPress: () => restoreItem(gone).catch(() => {}) },
+                      duration: 5000,
+                      root: true,
+                    });
+                  })
+                  .catch(() => {});
               }}
             >
               <Txt className="font-m600 text-base text-danger">Удалить пункт</Txt>

@@ -93,6 +93,33 @@ export function sortItems(items: Item[], now?: Date): Item[] {
   });
 }
 
+const WORDS: [RegExp, number][] = [
+  [/дн(я|ей|ь)/, 1],
+  [/недел(ю|и|ь|я)/, 7],
+  [/месяц(а|ев)?/, 30],
+  [/год|года|лет/, 365],
+];
+
+/**
+ * Срок, написанный прямо в названии: «Меняла линзы раз в месяц». Человек всё
+ * равно так говорит, и заставлять его после этого тыкать в чипы — лишний шаг.
+ * Возвращает очищенное название и найденный срок.
+ */
+export function parseEvery(text: string): { title: string; everyDays?: number } {
+  const re = /\s*[,(]?\s*(?:раз в|каждые|каждый|каждую|каждое)\s+(\d+)?\s*(дн\S*|недел\S*|месяц\S*|полгода|год\S*|лет)\s*\)?/i;
+  const m = text.match(re);
+  if (!m) return { title: text.trim() };
+
+  const count = m[1] ? parseInt(m[1], 10) : 1;
+  const unit = m[2].toLowerCase();
+  const days = unit === "полгода" ? 180 : (WORDS.find(([re2]) => re2.test(unit))?.[1] ?? 0) * count;
+  const title = (text.slice(0, m.index) + text.slice((m.index ?? 0) + m[0].length)).replace(/\s+/g, " ").trim();
+
+  // без названия срок бесполезен, а абсурдные числа чаще опечатка
+  if (!title || !days || days > 365 * 5) return { title: text.trim() };
+  return { title, everyDays: days };
+}
+
 /**
  * Когда примерно наступит следующий раз. Приложение и так знает срок, поэтому
  * смотреть только назад — половина пользы: «около 12 декабря» отвечает на

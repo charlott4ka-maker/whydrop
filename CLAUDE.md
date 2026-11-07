@@ -117,6 +117,12 @@ rules below come from.
   them: the median gap over at least three marks. Median, not mean, so one
   skipped year does not rewrite what "usually" means. A hand-set interval always
   wins over the guessed one.
+- The one reward the app allows itself is the counter running down to zero when
+  you mark something (`components/Counter.tsx`), and a soft glow of its own
+  colour on an overdue number. Nothing else celebrates, and nothing nags.
+- A due date written into the title ("Меняла линзы раз в месяц") is taken out of
+  it on save: the person already said it, asking them to repeat it with a chip
+  is a wasted step.
 - It is not a habit tracker and must never nag. It answers a question the person
   already has, which is why there are no goals, no streaks and no guilt.
 
