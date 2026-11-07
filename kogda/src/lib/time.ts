@@ -24,6 +24,7 @@ const plural = (n: number, one: string, few: string, many: string) => {
 export const daysWord = (n: number) => plural(n, "день", "дня", "дней");
 export const monthsWord = (n: number) => plural(n, "месяц", "месяца", "месяцев");
 export const timesWord = (n: number) => plural(n, "раз", "раза", "раз");
+export const marksWord = (n: number) => plural(n, "отметка", "отметки", "отметок");
 
 /**
  * Крупная цифра на карточке и слово под ней. Сама цифра всегда в днях: в этом

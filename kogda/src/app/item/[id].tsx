@@ -16,7 +16,7 @@ import {
   CATEGORIES, daysAgoIso, daysOf, expected, mark, readItems, removeItem, status, typicalInterval,
   unmark, type Item,
 } from "../../lib/items";
-import { ago, dateLabel, daysSince, daysWord, everyLabel, rough, timesWord } from "../../lib/time";
+import { ago, dateLabel, daysSince, daysWord, everyLabel, marksWord, rough } from "../../lib/time";
 import { C } from "../../theme/tokens";
 
 export default function ItemScreen() {
@@ -139,7 +139,7 @@ export default function ItemScreen() {
             <View>
               <Txt className="mb-3 px-4 font-m600 text-[13px] uppercase text-t2" style={{ letterSpacing: 0.4 }}>
                 {item.marks.length
-                  ? `Отметок: ${item.marks.length} ${timesWord(item.marks.length)}`
+                  ? `${item.marks.length} ${marksWord(item.marks.length)}`
                   : "Отметок пока нет"}
               </Txt>
               {item.marks.length ? (
