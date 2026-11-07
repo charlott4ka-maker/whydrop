@@ -80,7 +80,7 @@ export default function Home() {
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 10 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 12 }}
         showsVerticalScrollIndicator={false}
       >
         <ScreenTitle
@@ -138,13 +138,22 @@ function Row({ item, onDone, onEdit }: { item: Item; onDone: () => void; onEdit:
   const accent = st === "due" ? C.lime : st === "soon" ? C.t1 : C.t1;
 
   return (
-    <Card className="flex-row items-center gap-3 p-4" onPress={onEdit}>
+    <Card className="flex-row items-center gap-4 p-4" onPress={onEdit}>
       <View className="flex-1">
-        <Txt numberOfLines={1} className="text-[15px] text-t2">{item.title}</Txt>
+        {/* «Пора» стоит в строке названия, а не под числом: иначе карточки
+            получаются разной высоты и список идёт рваным */}
+        <View className="flex-row items-center gap-2">
+          <Txt numberOfLines={1} className="flex-1 text-[15px] text-t2">{item.title}</Txt>
+          {st === "due" && item.everyDays ? (
+            <View className="rounded-full px-3 py-1" style={{ backgroundColor: "rgba(200,255,74,0.16)" }}>
+              <Txt className="font-m600 text-[13px]" style={{ color: C.lime }}>Пора</Txt>
+            </View>
+          ) : null}
+        </View>
         {days === null ? (
           // крупное тире вместо числа читается как случайная чёрточка, поэтому
           // «ещё ни разу» пишем словами и помельче
-          <Txt className="mt-1 font-m700" style={{ fontSize: 20, letterSpacing: -0.2, color: accent }}>
+          <Txt className="mt-1 font-m700 text-[19px]" style={{ letterSpacing: -0.2, color: accent }}>
             Ещё ни разу
           </Txt>
         ) : (
@@ -155,12 +164,7 @@ function Row({ item, onDone, onEdit }: { item: Item; onDone: () => void; onEdit:
             <Txt className="text-[15px] text-t2">{a.unit}</Txt>
           </View>
         )}
-        {r ? <Txt className="mt-0.5 text-[13px] text-t3">{r}</Txt> : null}
-        {st === "due" && item.everyDays ? (
-          <View className="mt-2 self-start rounded-full px-2.5 py-1" style={{ backgroundColor: "rgba(200,255,74,0.16)" }}>
-            <Txt className="font-m600 text-[13px]" style={{ color: C.lime }}>Пора</Txt>
-          </View>
-        ) : null}
+        {r ? <Txt className="mt-1 text-[13px] text-t3">{r}</Txt> : null}
       </View>
       <GlassCircle size={52} onPress={onDone} label={"Отметить: " + item.title}>
         <Check size={24} color={C.t1} />

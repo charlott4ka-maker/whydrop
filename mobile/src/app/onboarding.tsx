@@ -17,7 +17,7 @@ const { width } = Dimensions.get("window");
 
 const Tag = ({ children, kind }: { children: string; kind: "lime" | "cyan" | "mute" }) => (
   <View
-    className="rounded-xl px-3 py-1.5"
+    className="rounded-xl px-3 py-1"
     style={{ backgroundColor: kind === "lime" ? C.lime : kind === "cyan" ? C.cyan : C.card2 }}
   >
     <Txt
@@ -67,7 +67,7 @@ const PAGES = [
           <Tag kind="cyan">Короткая форма</Tag>
         </View>
         <Txt className="font-m800" style={{ fontSize: 72, letterSpacing: -3 }}>1 мин</Txt>
-        <View className="gap-2.5">
+        <View className="gap-3">
           <Bar w="90%" />
           <Bar w="70%" />
           <Bar w="80%" />
@@ -88,7 +88,7 @@ const PAGES = [
           ["Падения нет", "−3%", C.ok],
           ["Нет Reels", "−18%", C.danger],
         ].map(([label, value, color]) => (
-          <View key={label as string} className="flex-row items-center justify-between rounded-[18px] bg-bg px-4 py-3.5">
+          <View key={label as string} className="flex-row items-center justify-between rounded-tile bg-bg px-4 py-4">
             <Txt className="font-m600">{label as string}</Txt>
             <Txt className="font-m700" style={{ color: color as string }}>{value as string}</Txt>
           </View>
@@ -119,7 +119,7 @@ export default function Onboarding() {
 
   return (
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
-      <View className="h-11 flex-row items-center justify-end px-5">
+      <View className="h-11 flex-row items-center justify-end px-4">
         {page < PAGES.length - 1 ? (
           <Txt className="px-3 py-3 font-m600 text-t2" accessibilityRole="button" onPress={finish}>Пропустить</Txt>
         ) : null}
@@ -133,7 +133,7 @@ export default function Onboarding() {
         onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
       >
         {PAGES.map((p) => (
-          <View key={p.title} style={{ width }} className="px-5">
+          <View key={p.title} style={{ width }} className="px-4">
             <View>
               {/* мягкий лаймовый отсвет из-под карточки, как тень от экрана */}
               <LinearGradient
@@ -141,14 +141,14 @@ export default function Onboarding() {
                 colors={["rgba(200,255,74,0.16)", "rgba(200,255,74,0)"]}
                 style={{ position: "absolute", left: 24, right: 24, bottom: -14, height: 56, borderRadius: 28 }}
               />
-              <View className="h-[330px] justify-center gap-3.5 overflow-hidden rounded-[32px] bg-card p-[22px]">{p.art}</View>
+              <View className="h-[330px] justify-center gap-4 overflow-hidden rounded-sheet bg-card p-6">{p.art}</View>
             </View>
           </View>
         ))}
       </ScrollView>
 
       {/* полоса из трёх сегментов: видно не только где ты, но и сколько осталось */}
-      <View className="flex-row gap-1.5 px-5 py-6">
+      <View className="flex-row gap-2 px-4 py-6">
         {PAGES.map((p, i) => (
           <View
             key={p.title}
@@ -158,12 +158,12 @@ export default function Onboarding() {
         ))}
       </View>
 
-      <Animated.View key={page} entering={FadeIn.duration(220)} className="flex-1 px-5">
+      <Animated.View key={page} entering={FadeIn.duration(220)} className="flex-1 px-4">
         <Txt className="font-m800 text-[34px]" style={{ letterSpacing: -1, lineHeight: 38 }}>{PAGES[page].title}</Txt>
         <Txt className="mt-3 text-[18px] leading-[25px] text-t2">{PAGES[page].sub}</Txt>
       </Animated.View>
 
-      <View className="px-5" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="px-4" style={{ paddingBottom: insets.bottom + 16 }}>
         <Pill full onPress={next}>{page === PAGES.length - 1 ? "Начать" : "Дальше"}</Pill>
       </View>
     </View>

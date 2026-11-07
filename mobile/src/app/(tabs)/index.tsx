@@ -144,7 +144,7 @@ export default function DiagnosisScreen() {
 function Connected({ account, pulling, onPull, warn }: { account: Account; pulling: boolean; onPull: () => void; warn: boolean }) {
   return (
     <View className="gap-2">
-      <Card className="flex-row items-center gap-3 p-3.5">
+      <Card className="flex-row items-center gap-3 p-4">
         {account.avatar ? (
           <Image source={{ uri: account.avatar }} style={{ width: 44, height: 44, borderRadius: 22 }} />
         ) : (
@@ -154,7 +154,7 @@ function Connected({ account, pulling, onPull, warn }: { account: Account; pulli
         )}
         <View className="flex-1">
           <Txt numberOfLines={1} className="font-m700">@{account.username}</Txt>
-          <Txt className="mt-0.5 text-[13px] text-t2">Цифры подтянутся сами</Txt>
+          <Txt className="mt-1 text-[13px] text-t2">Цифры подтянутся сами</Txt>
         </View>
         <Pill size="sm" loading={pulling} onPress={onPull} icon={<RefreshCw size={16} color={C.onLime} />}>
           Подтянуть
@@ -202,7 +202,7 @@ function HelpSheet({ visible, onClose, period }: { visible: boolean; onClose: ()
   ];
   return (
     <Sheet visible={visible} title="Откуда цифры" onClose={onClose}>
-      <View className="gap-3.5">
+      <View className="gap-4">
         {steps.map((s, i) => (
           <View key={s} className="flex-row items-start gap-3">
             <View className="h-[26px] w-[26px] items-center justify-center rounded-lg" style={{ backgroundColor: C.cyan }}>

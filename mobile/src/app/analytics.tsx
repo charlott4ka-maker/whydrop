@@ -61,20 +61,20 @@ export default function AnalyticsScreen() {
         </Txt>
 
         {!account ? (
-          <Card className="p-5">
+          <Card className="p-4">
             <Txt className="font-m700 text-[17px]">Нужен подключённый аккаунт</Txt>
-            <Txt className="mt-1.5 text-[15px] leading-5 text-t2">
+            <Txt className="mt-1 text-[15px] leading-5 text-t2">
               Эти разбивки Instagram отдаёт только через API: руками их не ввести.
             </Txt>
           </Card>
         ) : error ? (
-          <Card className="p-5">
+          <Card className="p-4">
             <Txt className="font-m700 text-[17px]">Не загрузилось</Txt>
-            <Txt className="mt-1.5 text-[15px] leading-5 text-t2">{error}</Txt>
+            <Txt className="mt-1 text-[15px] leading-5 text-t2">{error}</Txt>
             <View className="mt-4"><Pill kind="ghost" size="sm" onPress={load}>Ещё раз</Pill></View>
           </Card>
         ) : !data ? (
-          <Card className="p-5"><Txt className="text-t2">{loading ? "Считаю…" : "Нет данных"}</Txt></Card>
+          <Card className="p-4"><Txt className="text-t2">{loading ? "Считаю…" : "Нет данных"}</Txt></Card>
         ) : (
           <>
             <Split
@@ -143,11 +143,11 @@ export default function AnalyticsScreen() {
                       {t.thumb ? (
                         <Image source={{ uri: t.thumb }} style={{ width: 44, height: 44, borderRadius: 10 }} />
                       ) : (
-                        <View className="h-11 w-11 rounded-[10px] bg-card2" />
+                        <View className="h-11 w-11 rounded-xl bg-card2" />
                       )}
                       <View className="flex-1">
                         <Txt className="font-m600 text-[15px]">{t.type}</Txt>
-                        <Txt className="mt-0.5 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
+                        <Txt className="mt-1 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
                           {num(t.likes)} лайков · {num(t.comments)} комментариев
                         </Txt>
                       </View>

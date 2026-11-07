@@ -112,20 +112,20 @@ export default function ProfileScreen() {
             <Txt className="mt-1 text-[15px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
               {account.followers.toLocaleString("ru-RU")} подписчиков
             </Txt>
-            <View className="mt-5 w-full">
+            <View className="mt-6 w-full">
               <Pill full kind="ghost" onPress={onDisconnect}>Отключить</Pill>
             </View>
           </Card>
         ) : (
           <Card className="mb-8 items-center p-6">
-            <View className="h-[72px] w-[72px] items-center justify-center rounded-[24px] bg-card2">
+            <View className="h-[72px] w-[72px] items-center justify-center rounded-card bg-card2">
               <InstagramGlyph size={34} color={C.t1} />
             </View>
             <Txt className="mt-4 text-center font-m700 text-[19px]">Подключи Instagram</Txt>
-            <Txt className="mt-1.5 max-w-[300px] text-center text-[15px] leading-5 text-t2">
+            <Txt className="mt-1 max-w-[300px] text-center text-[15px] leading-5 text-t2">
               Охват, посты и подписчики подтянутся сами. Нужен профессиональный аккаунт, Business или Creator: у личного аккаунта статистика через Instagram закрыта.
             </Txt>
-            <View className="mt-5 w-full">
+            <View className="mt-6 w-full">
               <Pill full loading={busy} onPress={onConnect} icon={<InstagramGlyph size={18} color={C.onLime} />}>
                 Подключить
               </Pill>
@@ -154,7 +154,7 @@ export default function ProfileScreen() {
           </View>
           <View className="flex-1">
             <Txt className="font-m600 text-[15px]">Серия</Txt>
-            <Txt className="mt-0.5 text-[13px] text-t2">
+            <Txt className="mt-1 text-[13px] text-t2">
               {s.current > 0 ? `${s.current} ${weeksWord(s.current)} подряд` : "Начнётся с первого разбора"}
             </Txt>
           </View>
@@ -201,11 +201,11 @@ function PrivacySheet({ visible, onClose }: { visible: boolean; onClose: () => v
   ];
   return (
     <Sheet visible={visible} title="Конфиденциальность" onClose={onClose}>
-      <View className="gap-5">
+      <View className="gap-6">
         {blocks.map(([t, b]) => (
           <View key={t}>
             <Txt className="font-m700 text-[16px]">{t}</Txt>
-            <Txt className="mt-1.5 text-[15px] leading-5 text-t2">{b}</Txt>
+            <Txt className="mt-1 text-[15px] leading-5 text-t2">{b}</Txt>
           </View>
         ))}
       </View>

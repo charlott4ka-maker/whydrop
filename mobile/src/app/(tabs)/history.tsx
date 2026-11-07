@@ -66,7 +66,7 @@ export default function HistoryScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 120, gap: 10 }}
       >
         {items === null ? null : items.length === 0 ? (
-          <View className="pt-10">
+          <View className="pt-8">
             {prefs.saveHistory ? (
               <Empty
                 icon={Clock}
@@ -101,7 +101,7 @@ export default function HistoryScreen() {
                 <Card className="flex-row items-center gap-3 p-4">
                   <View className="flex-1">
                     <Txt numberOfLines={1} className="font-m700">{e.title}</Txt>
-                    <View className="mt-1 flex-row items-center gap-1.5">
+                    <View className="mt-1 flex-row items-center gap-2">
                       {e.source === "instagram" ? <InstagramGlyph size={13} color={C.t3} /> : null}
                       <Txt className="text-[13px] text-t2" style={{ fontVariant: ["tabular-nums"] }}>
                         {WORDS[e.period].short} · {when(e.at)} · охват {e.reach.toLocaleString("ru-RU")}
@@ -109,7 +109,7 @@ export default function HistoryScreen() {
                     </View>
                   </View>
                   <View
-                    className="rounded-xl px-2.5 py-1.5"
+                    className="rounded-xl px-3 py-1"
                     style={{ backgroundColor: e.change <= -5 ? "rgba(255,90,110,0.16)" : "rgba(79,224,160,0.16)" }}
                   >
                     <Txt className="font-m700 text-[15px]" style={{ fontVariant: ["tabular-nums"], color: e.change <= -5 ? C.danger : C.ok }}>

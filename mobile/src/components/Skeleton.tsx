@@ -24,7 +24,7 @@ export function WishGridSkeleton({ rows = 2 }: { rows?: number }) {
       {Array.from({ length: rows }, (_, i) => (
         <View key={i} className="flex-row gap-3">
           {[0, 1].map((j) => (
-            <View key={j} className="flex-1 rounded-[20px] bg-card p-2">
+            <View key={j} className="flex-1 rounded-tile bg-card p-2">
               <Bone style={{ aspectRatio: 1 }} r={12} />
               <View className="gap-2 px-1 pb-1 pt-3">
                 <Bone w="80%" h={14} r={7} />

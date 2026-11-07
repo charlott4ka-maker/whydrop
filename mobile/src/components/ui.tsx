@@ -110,7 +110,7 @@ export function Segmented<K extends string>({ options, value, onChange, neutral,
   const sx = useSharedValue(1);
   const sy = useSharedValue(1);
   const first = useRef(true);
-  const segW = w ? (w - 12 - 4 * (options.length - 1)) / options.length : 0;
+  const segW = w ? (w - 8 - 4 * (options.length - 1)) / options.length : 0;
   useEffect(() => {
     const to = idx * (segW + 4);
     if (first.current || !segW) {
@@ -125,9 +125,9 @@ export function Segmented<K extends string>({ options, value, onChange, neutral,
   }, [idx, segW]); // eslint-disable-line react-hooks/exhaustive-deps
   const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }, { scaleX: sx.value }, { scaleY: sy.value }] }));
   return (
-    <View className={`h-lg flex-row gap-1 rounded-full p-1.5 ${className}`} style={{ backgroundColor: fill }} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
+    <View className={`h-lg flex-row gap-1 rounded-full p-1 ${className}`} style={{ backgroundColor: fill }} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
       {segW ? (
-        <Animated.View pointerEvents="none" style={[{ position: "absolute", left: 6, top: 6, bottom: 6, width: segW, borderRadius: 999, backgroundColor: neutral ? SEG_ON : C.lime }, pill]} />
+        <Animated.View pointerEvents="none" style={[{ position: "absolute", left: 4, top: 4, bottom: 4, width: segW, borderRadius: 999, backgroundColor: neutral ? SEG_ON : C.lime }, pill]} />
       ) : null}
       {options.map(([k, l]) => {
         const on = value === k;
@@ -200,8 +200,8 @@ export function Sheet({ visible, title, onClose, children }: { visible: boolean;
   if (Platform.OS === "ios") {
     return (
       <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-        <View className="flex-1 bg-card px-4 pt-2.5">
-          <View className="mx-auto mb-3.5 mt-1.5 h-1 w-10 rounded bg-card2" />
+        <View className="flex-1 bg-card px-4 pt-2">
+          <View className="mx-auto mb-3 mt-1 h-1 w-10 rounded bg-card2" />
           <View className="mb-4 flex-row items-center justify-between gap-3">
             <Txt className="flex-1 font-m800 text-xl">{title || ""}</Txt>
             <CloseButton onPress={onClose} />
@@ -217,8 +217,8 @@ export function Sheet({ visible, title, onClose, children }: { visible: boolean;
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <KeyboardAvoidingView className="flex-1 justify-end">
         <Pressable onPress={onClose} className="absolute inset-0 bg-black/60" />
-        <View className="max-h-[88%] rounded-t-sheet bg-card px-4 pt-2.5" style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}>
-          <View className="mx-auto mb-3.5 mt-1.5 h-1 w-10 rounded bg-card2" />
+        <View className="max-h-[88%] rounded-t-sheet bg-card px-4 pt-2" style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}>
+          <View className="mx-auto mb-3 mt-1 h-1 w-10 rounded bg-card2" />
           <View className="mb-4 flex-row items-center justify-between gap-3">
             <Txt className="flex-1 font-m800 text-xl">{title || ""}</Txt>
             <CloseButton onPress={onClose} />
@@ -241,7 +241,7 @@ export function Empty({ icon: Icon, title, sub, action, compact, fill }: { icon:
   const tile = compact ? 56 : 72;
   return (
     <Animated.View entering={FadeIn.duration(350)} style={fill ? { flex: 1 } : undefined}>
-    <View className={`items-center ${fill ? "flex-1 justify-center py-8" : compact ? "p-2" : "px-6 py-12"}`}>
+    <View className={`items-center ${fill ? "flex-1 justify-center py-8" : compact ? "p-2" : "px-6 py-8"}`}>
       <LinearGradient colors={[C.lime, C.cyan]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: tile, height: tile, borderRadius: tile / 3, alignItems: "center", justifyContent: "center" }}>
         <Icon size={compact ? 26 : 34} color={C.onLime} absoluteStrokeWidth strokeWidth={2.2} />
       </LinearGradient>
@@ -281,11 +281,11 @@ export function Field({
         textContentType={textContentType}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
-        className={`bg-card2 px-4 font-m500 text-[16px] text-t1 ${multiline ? "min-h-[76px] rounded-[20px]" : "h-lg rounded-full"}`}
+        className={`bg-card2 px-4 font-m500 text-[16px] text-t1 ${multiline ? "min-h-[76px] rounded-tile" : "h-lg rounded-full"}`}
         // fontSize only: a line height (text-base sets 24) pushes iOS input text down
         style={{ borderWidth: 1, borderColor: error ? C.danger : focus ? C.cyan : "transparent", textAlignVertical: multiline ? "top" : "center", paddingTop: multiline ? 14 : 0, paddingBottom: multiline ? 14 : 0 }}
       />
-      {error ? <Txt className="mt-1.5 px-4 text-[13px] text-danger">{error}</Txt> : null}
+      {error ? <Txt className="mt-1 px-4 text-[13px] text-danger">{error}</Txt> : null}
     </View>
   );
 }
@@ -308,7 +308,7 @@ export function HeaderAdd({ onPress, label }: { onPress: () => void; label: stri
 
 export function ScreenTitle({ title, sub, right, compact }: { title: string; sub?: string; right?: React.ReactNode; compact?: boolean }) {
   return (
-    <View className={`flex-row ${sub ? "items-end" : "items-center"} justify-between gap-3 px-1 ${compact ? "pb-3" : "pb-6"} pt-1.5`}>
+    <View className={`flex-row ${sub ? "items-end" : "items-center"} justify-between gap-3 px-1 ${compact ? "pb-3" : "pb-6"} pt-2`}>
       <View className="flex-1">
         <Txt className="font-m800 text-[26px]" style={{ letterSpacing: -0.5 }}>{title}</Txt>
         {sub ? <Txt className="mt-1 text-sm text-t2">{sub}</Txt> : null}

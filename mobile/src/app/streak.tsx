@@ -43,13 +43,13 @@ export default function StreakScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Card className="items-center p-6">
-          <View className="h-[72px] w-[72px] items-center justify-center rounded-[24px]" style={{ backgroundColor: "rgba(200,255,74,0.16)" }}>
+          <View className="h-[72px] w-[72px] items-center justify-center rounded-card" style={{ backgroundColor: "rgba(200,255,74,0.16)" }}>
             <Flame size={34} color={C.lime} absoluteStrokeWidth strokeWidth={2} />
           </View>
           <Txt className="mt-4 font-m800 text-[44px]" style={{ letterSpacing: -1, fontVariant: ["tabular-nums"] }}>
             {s.current}
           </Txt>
-          <Txt className="mt-0.5 text-[15px] text-t2">{weeksWord(s.current)} подряд</Txt>
+          <Txt className="mt-1 text-[15px] text-t2">{weeksWord(s.current)} подряд</Txt>
           <Txt className="mt-3 max-w-[280px] text-center text-[13px] leading-[18px] text-t3">
             {s.doneThisWeek
               ? "Эта неделя закрыта. Следующий разбор на следующей неделе продлит серию."
@@ -72,7 +72,7 @@ export default function StreakScreen() {
             {list.map((a, i) => (
               <View key={a.id}>
                 {i > 0 ? <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginLeft: 16 }} /> : null}
-                <View className="flex-row items-center gap-3 px-4 py-3.5">
+                <View className="flex-row items-center gap-3 px-4 py-4">
                   <View
                     className="h-9 w-9 items-center justify-center rounded-xl"
                     style={{ backgroundColor: a.done ? C.lime : C.card2 }}
@@ -89,7 +89,7 @@ export default function StreakScreen() {
                     <Txt className={`text-[15px] ${a.done ? "font-m600" : ""}`} style={{ color: a.done ? C.t1 : C.t2 }}>
                       {a.title}
                     </Txt>
-                    <Txt className="mt-0.5 text-[13px] leading-[17px] text-t3">{a.sub}</Txt>
+                    <Txt className="mt-1 text-[13px] leading-[17px] text-t3">{a.sub}</Txt>
                   </View>
                   {a.progress && !a.done ? (
                     <Txt className="text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>

@@ -95,7 +95,7 @@ export default function ResultScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        <Card className="p-[18px]">
+        <Card className="p-4">
           <Txt
             className="font-m800"
             style={{ fontSize: 64, letterSpacing: -2, fontVariant: ["tabular-nums"], color: d.falling ? C.danger : C.ok }}
@@ -106,13 +106,13 @@ export default function ResultScreen() {
             {compared(period)}{p.at ? " · " + date(p.at) : ""}
           </Txt>
           <Txt className="mt-3 font-m700 text-[19px]">{d.title}</Txt>
-          <Txt className="mt-1.5 text-[15px] leading-5 text-t2">{d.why}</Txt>
+          <Txt className="mt-1 text-[15px] leading-5 text-t2">{d.why}</Txt>
         </Card>
 
-        <Card className="px-[18px] py-1.5">
+        <Card className="px-4 py-1">
           <Txt className="py-3 font-m700 text-[19px]">Что делать</Txt>
           {d.actions.map((a, i) => (
-            <View key={a} className="flex-row items-start gap-3 py-3.5" style={{ borderTopWidth: 1, borderTopColor: C.line }}>
+            <View key={a} className="flex-row items-start gap-3 py-4" style={{ borderTopWidth: 1, borderTopColor: C.line }}>
               <View className="h-[26px] w-[26px] items-center justify-center rounded-lg" style={{ backgroundColor: C.cyan }}>
                 <Txt className="font-m700 text-[15px]" style={{ color: C.onCyan }}>{i + 1}</Txt>
               </View>
