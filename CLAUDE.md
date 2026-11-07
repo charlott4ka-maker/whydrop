@@ -40,6 +40,11 @@ rules below come from.
   secondary button share `card2`. A fall is `danger`, a rise is `ok`.
 - No outlines on blocks (cards, sheets, icon tiles). A field outlines in red
   only while it holds an error.
+- A coloured tile in a settings row carries a white glyph, so its fill has to be
+  dark enough for one: cyan and the other light accents give about 1.4:1 and the
+  icon disappears. Indigo `#5468F0` and grey `#636366` are the safe fills, with
+  `danger` for destructive rows. Cyan stays where it is text or a mark on a dark
+  surface, never a background under white.
 - Icons: lucide-react-native, 1.5px stroke (`absoluteStrokeWidth`) in small
   round buttons, even sizes so they sit dead centre. lucide dropped its brand
   icons, so the Instagram mark is our own `InstagramGlyph`.

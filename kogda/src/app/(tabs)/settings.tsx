@@ -71,7 +71,7 @@ export default function SettingsScreen() {
         <SettingsGroup title="О приложении" footer={"Когда " + VERSION}>
           <SettingsCell
             icon={BookOpen}
-            tint="#3DF2EE"
+            tint="#5468F0"
             label="Как это работает"
             onPress={() => {
               haptic("light");

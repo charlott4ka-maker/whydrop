@@ -162,7 +162,7 @@ export default function ProfileScreen() {
         </Card>
 
         <SettingsGroup title="Разборы">
-          <SettingsCell icon={BarChart3} tint="#3DF2EE" label="Аналитика" onPress={() => router.push("/analytics")} />
+          <SettingsCell icon={BarChart3} tint="#5468F0" label="Аналитика" onPress={() => router.push("/analytics")} />
         </SettingsGroup>
 
         <SettingsGroup title="Приложение">
@@ -182,7 +182,7 @@ export default function ProfileScreen() {
         </SettingsGroup>
 
         <SettingsGroup title="О приложении" footer={"whydrop " + VERSION}>
-          <SettingsCell icon={BookOpen} tint="#3DF2EE" label="Как это работает" onPress={replayIntro} />
+          <SettingsCell icon={BookOpen} tint="#5468F0" label="Как это работает" onPress={replayIntro} />
           <SettingsCell icon={Lock} tint="#636366" label="Конфиденциальность" onPress={() => setPrivacy(true)} />
         </SettingsGroup>
       </ScrollView>
