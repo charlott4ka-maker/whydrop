@@ -16,7 +16,7 @@ import { Card, Field, GlassCircle, Pill, Sheet, Txt } from "../../components/ui"
 import { haptic } from "../../lib/haptics";
 import {
   CATEGORIES, daysAgoIso, daysOf, expected, mark, nextDue, readItems, removeItem, restoreItem,
-  setMarkNote, status, typicalInterval, unmark, type Item, type Mark,
+  moveMark, setMarkNote, status, typicalInterval, unmark, type Item, type Mark,
 } from "../../lib/items";
 import { ago, dateLabel, daysSince, daysWord, everyLabel, marksWord, nextLabel, rough } from "../../lib/time";
 import { C } from "../../theme/tokens";
@@ -29,6 +29,8 @@ export default function ItemScreen() {
   const [editing, setEditing] = useState<Item | "new" | null>(null);
   const [picking, setPicking] = useState(false);
   const [pickDate, setPickDate] = useState(new Date());
+  /** какую отметку переносим; null — ставим новую */
+  const [moving, setMoving] = useState<Mark | null>(null);
   const [noting, setNoting] = useState<Mark | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
 
@@ -176,6 +178,7 @@ export default function ItemScreen() {
                 full
                 kind="ghost"
                 onPress={() => {
+                  setMoving(null);
                   setPickDate(new Date());
                   setPicking(true);
                 }}
@@ -256,7 +259,7 @@ export default function ItemScreen() {
         )}
       </ScrollView>
 
-      <Sheet visible={picking} title="Когда это было" onClose={() => setPicking(false)}>
+      <Sheet visible={picking} title={moving ? "Перенести на" : "Когда это было"} onClose={() => setPicking(false)}>
         <Calendar value={pickDate} onChange={setPickDate} />
         <Txt className="mt-4 text-center text-[15px] text-t2">
           {dateLabel(pickDate.toISOString())} · {daysSince(pickDate.toISOString())} {daysWord(daysSince(pickDate.toISOString()))} назад
@@ -268,10 +271,20 @@ export default function ItemScreen() {
               setPicking(false);
               const at = new Date(pickDate);
               at.setHours(12, 0, 0, 0);
+              if (moving) {
+                const from = moving.at;
+                setMoving(null);
+                haptic("light");
+                moveMark(id, from, at.toISOString())
+                  .then(() => reload())
+                  .then(() => toast.success("Перенесено на " + dateLabel(at.toISOString())))
+                  .catch(() => {});
+                return;
+              }
               put(at.toISOString(), "Отмечено: " + dateLabel(at.toISOString()));
             }}
           >
-            Отметить
+            {moving ? "Перенести" : "Отметить"}
           </Pill>
         </View>
       </Sheet>
@@ -285,16 +298,32 @@ export default function ItemScreen() {
           autoCapitalize="sentences"
           multiline
         />
-        <Pill
-          full
-          onPress={() => {
-            const target = noting;
-            setNoting(null);
-            if (target) setMarkNote(id, target.at, noteDraft).then(() => reload()).catch(() => {});
-          }}
-        >
-          Сохранить
-        </Pill>
+        <View className="gap-3">
+          <Pill
+            full
+            onPress={() => {
+              const target = noting;
+              setNoting(null);
+              if (target) setMarkNote(id, target.at, noteDraft).then(() => reload()).catch(() => {});
+            }}
+          >
+            Сохранить
+          </Pill>
+          <Pill
+            full
+            kind="ghost"
+            onPress={() => {
+              const target = noting;
+              if (!target) return;
+              setNoting(null);
+              setMoving(target);
+              setPickDate(new Date(target.at));
+              setPicking(true);
+            }}
+          >
+            Перенести на другую дату
+          </Pill>
+        </View>
       </Sheet>
 
       <ItemSheet item={editing} onClose={() => setEditing(null)} onSaved={() => reload()} />

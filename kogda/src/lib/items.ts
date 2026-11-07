@@ -267,6 +267,29 @@ export async function restoreItem(item: Item): Promise<Item[]> {
   return write([item, ...items]);
 }
 
+/** Перенести отметку на другую дату, не потеряв приписку к ней. */
+export async function moveMark(id: string, from: string, to: string): Promise<Item[]> {
+  const items = await readItems();
+  return write(
+    items.map((i) => {
+      if (i.id !== id) return i;
+      const old = i.marks.find((m) => m.at === from);
+      if (!old) return i;
+      return {
+        ...i,
+        marks: [{ at: to, note: old.note }, ...i.marks.filter((m) => m.at !== from)].sort(
+          (a, b) => +new Date(b.at) - +new Date(a.at),
+        ),
+      };
+    }),
+  );
+}
+
 export async function clearAll(): Promise<void> {
   await AsyncStorage.removeItem(KEY).catch(() => {});
+}
+
+/** Вернуть весь список после «удалить всё»: отмена из тоста. */
+export async function restoreAll(items: Item[]): Promise<Item[]> {
+  return write(items);
 }

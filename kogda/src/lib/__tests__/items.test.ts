@@ -1,6 +1,6 @@
 import {
-  byCategory, dueCount, expected, nextDue, orderBy, parseEvery, sortItems, status, typicalInterval,
-  type Item,
+  addItem, byCategory, clearAll, dueCount, expected, moveMark, nextDue, orderBy, parseEvery, readItems,
+  sortItems, status, typicalInterval, type Item,
 } from "../items";
 
 const now = new Date("2026-11-07T12:00:00");
@@ -183,5 +183,24 @@ describe("parseEvery", () => {
 
   it("refuses absurd numbers rather than trusting a typo", () => {
     expect(parseEvery("Меняла масло каждые 90 лет")).toEqual({ title: "Меняла масло каждые 90 лет" });
+  });
+});
+
+describe("moveMark", () => {
+  it("moves the date and keeps what was written about that time", async () => {
+    await clearAll();
+    await addItem("Стригла волосы", { marks: [{ at: ago(60), note: "У Иры" }, { at: ago(120) }] });
+    const [saved] = await readItems();
+    const next = await moveMark(saved.id, saved.marks[0].at, ago(30));
+    expect(next[0].marks.map((m) => m.note)).toEqual(["У Иры", undefined]);
+    expect(next[0].marks).toHaveLength(2);
+  });
+
+  it("leaves everything alone when that mark is gone", async () => {
+    await clearAll();
+    await addItem("Мыла окна", { marks: [{ at: ago(10) }] });
+    const [saved] = await readItems();
+    const next = await moveMark(saved.id, ago(999), ago(1));
+    expect(next[0].marks[0].at).toBe(saved.marks[0].at);
   });
 });

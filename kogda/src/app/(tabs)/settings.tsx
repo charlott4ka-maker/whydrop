@@ -12,7 +12,7 @@ import { SettingsCell, SettingsGroup } from "../../components/SettingsList";
 import { toast } from "../../components/Toast";
 import { Card, ScreenTitle, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
-import { clearAll, daysOf, expected, readItems, status, type Item } from "../../lib/items";
+import { clearAll, daysOf, expected, readItems, restoreAll, status, type Item } from "../../lib/items";
 import { setPref, usePrefs } from "../../lib/prefs";
 import { daysWord, everyLabel } from "../../lib/time";
 import { C } from "../../theme/tokens";
@@ -33,15 +33,24 @@ export default function SettingsScreen() {
   );
 
   const wipe = () => {
-    Alert.alert("Удалить все пункты?", "Вместе с историей отметок. Отменить это нельзя.", [
+    Alert.alert("Удалить все пункты?", "Вместе с историей отметок.", [
       { text: "Отмена", style: "cancel" },
       {
         text: "Удалить",
         style: "destructive",
         onPress: () => {
-          clearAll().then(() => setItems([])).catch(() => {});
+          // список копился годами: без отмены один промах стирает всю историю
+          const gone = items;
+          clearAll()
+            .then(() => setItems([]))
+            .then(() =>
+              toast.info("Всё удалено", {
+                action: { label: "Отменить", onPress: () => restoreAll(gone).then(setItems).catch(() => {}) },
+                duration: 6000,
+              }),
+            )
+            .catch(() => {});
           haptic("warning");
-          toast.success("Всё удалено");
         },
       },
     ]);
