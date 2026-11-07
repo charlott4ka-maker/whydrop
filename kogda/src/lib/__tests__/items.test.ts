@@ -1,5 +1,5 @@
 import {
-  byCategory, dueCount, expected, orderBy, sortItems, status, typicalInterval, type Item,
+  byCategory, dueCount, expected, nextDue, orderBy, sortItems, status, typicalInterval, type Item,
 } from "../items";
 
 const now = new Date("2026-11-07T12:00:00");
@@ -140,5 +140,23 @@ describe("byCategory", () => {
     const a = { ...item("раз", [1]), category: "home" as const };
     const b = { ...item("два", [2]), category: "home" as const };
     expect(byCategory([a, b])[0].items.map((i) => i.title)).toEqual(["раз", "два"]);
+  });
+});
+
+describe("nextDue", () => {
+  it("counts forward from the last mark by the interval that applies", () => {
+    const i = item("линзы", [10], 30);
+    expect(nextDue(i)?.toDateString()).toBe(new Date(now.getTime() + 20 * 864e5).toDateString());
+  });
+
+  it("uses the guessed interval when none was set", () => {
+    // привычка раз в 30 дней, последний раз 10 дней назад
+    const i = item("линзы", [10, 40, 70]);
+    expect(nextDue(i)?.toDateString()).toBe(new Date(now.getTime() + 20 * 864e5).toDateString());
+  });
+
+  it("predicts nothing without an interval or without a mark", () => {
+    expect(nextDue(item("шторы", [212]))).toBeNull();
+    expect(nextDue(item("щётка", [], 90))).toBeNull();
   });
 });

@@ -103,6 +103,11 @@ rules below come from.
   (and accepted from inside Instagram) can connect.
 
 ## Когда (kogda/)
+- Three tabs on the **system** tab bar, so iOS 26 gives it real Liquid Glass
+  instead of an imitation. Glass goes on the floating navigation layer only,
+  never on cards: Apple's own guidance, and glass on glass turns to mush.
+  Screens paint no background; one `Glow` layer sits under all of them, because
+  on flat black there is nothing for glass to refract.
 - The app keeps every mark, not just the last date, and reads the habit off
   them: the median gap over at least three marks. Median, not mean, so one
   skipped year does not rewrite what "usually" means. A hand-set interval always

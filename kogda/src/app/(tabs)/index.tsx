@@ -3,23 +3,23 @@
 // на пяти пунктах и то и другое было бы лишним шумом.
 
 import { useFocusEffect, useRouter } from "expo-router";
-import { Clock, LayoutGrid, Search, Settings2 } from "lucide-react-native";
+import { Clock, LayoutGrid, Search } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ItemRow } from "../components/ItemRow";
-import { ItemSheet } from "../components/ItemSheet";
-import { ViewSheet } from "../components/ViewSheet";
-import { toast } from "../components/Toast";
-import { Chip, Empty, GlassCircle, HeaderAdd, Pill, ScreenTitle, Segmented, Txt } from "../components/ui";
-import { haptic } from "../lib/haptics";
+import { ItemRow } from "../../components/ItemRow";
+import { ItemSheet } from "../../components/ItemSheet";
+import { ViewSheet } from "../../components/ViewSheet";
+import { toast } from "../../components/Toast";
+import { Chip, Empty, GlassCircle, HeaderAdd, Pill, ScreenTitle, Segmented, Txt } from "../../components/ui";
+import { haptic } from "../../lib/haptics";
 import {
   addItem, byCategory, daysAgoIso, dueCount, mark, orderBy, readItems, removeItem, restoreItem, status,
   unmark, type Item,
-} from "../lib/items";
-import { usePrefs } from "../lib/prefs";
-import { C } from "../theme/tokens";
+} from "../../lib/items";
+import { usePrefs } from "../../lib/prefs";
+import { C } from "../../theme/tokens";
 
 const SUGGEST = [
   "Меняла линзы",
@@ -81,17 +81,21 @@ export default function Home() {
   const all = items ?? [];
   const due = dueCount(all);
   const busy = all.length >= BUSY;
-  const found = all.filter((i) =>
-    query.trim() ? i.title.toLowerCase().includes(query.trim().toLowerCase()) : true,
-  );
+  const q = query.trim().toLowerCase();
+  const found = all.filter((i) => {
+    if (!q) return true;
+    // ищем и по заметкам: «Aquaphor» человек помнит лучше, чем «фильтр»
+    const hay = [i.title, i.note ?? "", ...i.marks.map((m) => m.note ?? "")].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
   const list = orderBy(tab === "due" ? found.filter((i) => status(i) === "due") : found, prefs.sort);
   const groups = prefs.group ? byCategory(list) : null;
 
   return (
-    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 16 }}
+        contentContainerStyle={{ padding: 16, paddingTop: insets.top + 8, paddingBottom: insets.bottom + 120, gap: 16 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
@@ -102,9 +106,6 @@ export default function Home() {
             <View className="flex-row gap-2">
               <GlassCircle size={52} onPress={() => setViewSheet(true)} label="Вид списка">
                 <LayoutGrid size={22} color={C.t1} />
-              </GlassCircle>
-              <GlassCircle size={52} onPress={() => router.push("/settings")} label="Настройки">
-                <Settings2 size={22} color={C.t1} />
               </GlassCircle>
               <HeaderAdd onPress={() => setEditing("new")} label="Добавить" />
             </View>
@@ -141,7 +142,7 @@ export default function Home() {
                 <TextInput
                   value={query}
                   onChangeText={setQuery}
-                  placeholder="Найти"
+                  placeholder="Найти по названию или заметке"
                   placeholderTextColor={C.hint}
                   returnKeyType="search"
                   className="flex-1 font-m500 text-t1"
@@ -161,7 +162,7 @@ export default function Home() {
 
             {list.length === 0 ? (
               <Txt className="px-1 pt-4 text-[15px] text-t3">
-                {query.trim() ? "Ничего не нашлось." : "Сейчас ничего не просрочено."}
+                {q ? "Ничего не нашлось." : "Сейчас ничего не просрочено."}
               </Txt>
             ) : groups ? (
               groups.map((g) => (

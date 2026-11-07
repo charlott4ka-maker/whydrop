@@ -1,4 +1,4 @@
-import { ago, dateLabel, daysSince, daysWord, everyLabel, rough } from "../time";
+import { ago, dateLabel, daysSince, daysWord, everyLabel, nextLabel, rough } from "../time";
 
 const at = (s: string) => new Date(s).toISOString();
 
@@ -81,5 +81,25 @@ describe("dateLabel", () => {
   });
   it("adds the year once it is not", () => {
     expect(dateLabel("2025-03-02T10:00:00", now)).toBe("2 марта 2025");
+  });
+});
+
+describe("nextLabel", () => {
+  const now = new Date("2026-11-07T12:00:00");
+  const inDays = (n: number) => new Date(now.getTime() + n * 24 * 3600 * 1000);
+
+  it("says the near future in days", () => {
+    expect(nextLabel(inDays(1), now)).toBe("завтра");
+    expect(nextLabel(inDays(5), now)).toBe("через 5 дней");
+    expect(nextLabel(inDays(14), now)).toBe("через 14 дней");
+  });
+
+  it("switches to a date once days stop being useful", () => {
+    expect(nextLabel(inDays(35), now)).toBe("около 12 декабря");
+  });
+
+  it("does not pretend the past is the future", () => {
+    expect(nextLabel(inDays(0), now)).toBe("уже пора");
+    expect(nextLabel(inDays(-9), now)).toBe("уже пора");
   });
 });

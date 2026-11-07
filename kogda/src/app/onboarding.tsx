@@ -41,7 +41,7 @@ export default function Onboarding() {
   };
 
   return (
-    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top }}>
       <View className="flex-row gap-2 px-4 py-6">
         {[0, 1].map((i) => (
           <View key={i} className="h-1 flex-1 rounded-full" style={{ backgroundColor: i <= step ? C.lime : C.card2 }} />

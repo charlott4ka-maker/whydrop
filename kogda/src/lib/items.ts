@@ -93,6 +93,18 @@ export function sortItems(items: Item[], now?: Date): Item[] {
   });
 }
 
+/**
+ * Когда примерно наступит следующий раз. Приложение и так знает срок, поэтому
+ * смотреть только назад — половина пользы: «около 12 декабря» отвечает на
+ * вопрос, который человек задаёт сразу после «а когда было в прошлый раз».
+ */
+export function nextDue(i: Item): Date | null {
+  const every = expected(i);
+  const last = i.marks[0];
+  if (!every || !last) return null;
+  return new Date(new Date(last.at).getTime() + every * 864e5);
+}
+
 /** Сортировки из шита «Вид». «recent» — та же, что по умолчанию. */
 export function orderBy(items: Item[], sort: "recent" | "alpha" | "due", now?: Date): Item[] {
   if (sort === "alpha") return [...items].sort((a, b) => a.title.localeCompare(b.title, "ru"));

@@ -78,3 +78,15 @@ export function dateLabel(iso: string, now: Date = new Date()): string {
   const base = `${d.getDate()} ${MONTHS[d.getMonth()]}`;
   return d.getFullYear() === now.getFullYear() ? base : `${base} ${d.getFullYear()}`;
 }
+
+/**
+ * Когда примерно в следующий раз. Близкое говорим в днях, далёкое датой:
+ * «через 5 дней» полезно, «через 173 дня» — нет.
+ */
+export function nextLabel(when: Date, now: Date = new Date()): string {
+  const d = Math.round((midnight(when) - midnight(now)) / DAY);
+  if (d <= 0) return "уже пора";
+  if (d === 1) return "завтра";
+  if (d <= 14) return `через ${d} ${daysWord(d)}`;
+  return "около " + dateLabel(when.toISOString(), now);
+}

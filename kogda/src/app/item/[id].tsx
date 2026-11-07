@@ -3,9 +3,9 @@
 // часто ты это делаешь на самом деле.
 
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Check, ChevronLeft, Pencil, Trash2 } from "lucide-react-native";
+import { Check, ChevronLeft, Pencil, Share2, Trash2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Calendar } from "../../components/Calendar";
@@ -14,10 +14,10 @@ import { toast } from "../../components/Toast";
 import { Card, Field, GlassCircle, Pill, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
 import {
-  CATEGORIES, daysAgoIso, daysOf, expected, mark, readItems, removeItem, setMarkNote, status,
-  typicalInterval, unmark, type Item, type Mark,
+  CATEGORIES, daysAgoIso, daysOf, expected, mark, nextDue, readItems, removeItem, setMarkNote,
+  status, typicalInterval, unmark, type Item, type Mark,
 } from "../../lib/items";
-import { ago, dateLabel, daysSince, daysWord, everyLabel, marksWord, rough } from "../../lib/time";
+import { ago, dateLabel, daysSince, daysWord, everyLabel, marksWord, nextLabel, rough } from "../../lib/time";
 import { C } from "../../theme/tokens";
 
 export default function ItemScreen() {
@@ -41,7 +41,7 @@ export default function ItemScreen() {
 
   if (item === "missing") {
     return (
-      <View className="flex-1 items-center justify-center bg-bg px-6" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 items-center justify-center px-6" style={{ paddingTop: insets.top }}>
         <Txt className="text-center text-t2">Пункт не найден.</Txt>
         <View className="mt-6 w-full"><Pill full kind="ghost" onPress={() => router.back()}>Назад</Pill></View>
       </View>
@@ -66,15 +66,34 @@ export default function ItemScreen() {
   const st = item ? status(item) : "none";
   const every = item ? expected(item) : null;
   const guessed = item ? typicalInterval(item) : null;
+  const next = item ? nextDue(item) : null;
+
+  const share = async () => {
+    if (!item) return;
+    const lines = [
+      days === null
+        ? `${item.title}: ещё ни разу.`
+        : `${item.title}: ${days} ${daysWord(days)} назад.`,
+      r ? r[0].toUpperCase() + r.slice(1) + "." : "",
+      "",
+      "Считает приложение «Когда»",
+    ].filter(Boolean);
+    try {
+      await Share.share({ message: lines.join("\n") });
+    } catch {}
+  };
   const category = item ? CATEGORIES.find((c) => c.id === item.category) : undefined;
 
   return (
-    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top }}>
       <View className="flex-row items-center gap-3 px-4 pb-2 pt-2">
         <GlassCircle onPress={() => router.back()} label="Назад">
           <ChevronLeft size={22} color={C.t1} />
         </GlassCircle>
         <Txt numberOfLines={1} className="flex-1 font-m800 text-[22px]">{item?.title ?? ""}</Txt>
+        <GlassCircle onPress={share} label="Поделиться">
+          <Share2 size={20} color={C.t1} />
+        </GlassCircle>
         <GlassCircle onPress={() => item && setEditing(item)} label="Изменить">
           <Pencil size={20} color={C.t1} />
         </GlassCircle>
@@ -118,11 +137,20 @@ export default function ItemScreen() {
                 </Txt>
               ) : null}
               {every ? (
-                <Txt className="mt-3 text-[15px] text-t2">
-                  {item.everyDays ? "Срок: " : "Обычно "}
-                  {everyLabel(every)}
-                  {!item.everyDays ? ", приложение заметило само" : ""}
-                </Txt>
+                <>
+                  <Txt className="mt-3 text-[15px] text-t2">
+                    {item.everyDays ? "Срок: " : "Обычно "}
+                    {everyLabel(every)}
+                    {!item.everyDays ? ", приложение заметило само" : ""}
+                  </Txt>
+                  {next ? (
+                    // смотреть только назад — половина пользы: человек сразу
+                    // спрашивает, когда теперь
+                    <Txt className="mt-1 text-[15px]" style={{ color: st === "due" ? C.lime : C.t2 }}>
+                      Следующий раз {nextLabel(next)}
+                    </Txt>
+                  ) : null}
+                </>
               ) : (
                 <Txt className="mt-3 text-[13px] leading-[18px] text-t3">
                   Срок не задан. После трёх отметок станет видно, как часто ты это делаешь, и приложение начнёт считать по этому.
