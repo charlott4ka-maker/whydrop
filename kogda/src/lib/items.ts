@@ -19,14 +19,19 @@ export const CATEGORIES: { id: CategoryId; title: string }[] = [
   { id: "other", title: "Разное" },
 ];
 
+/** Отметка: когда это было и, если есть что сказать, что именно было. */
+export type Mark = { at: string; note?: string };
+
 export type Item = {
   id: string;
   title: string;
   category: CategoryId;
   /** срок, заданный руками; пусто — приложение смотрит на привычку */
   everyDays?: number;
-  /** отметки, новые первыми, ISO */
-  marks: string[];
+  /** что помнить к следующему разу: модель фильтра, телефон мастера */
+  note?: string;
+  /** отметки, новые первыми */
+  marks: Mark[];
   createdAt: string;
 };
 
@@ -35,9 +40,9 @@ export type Status = "none" | "ok" | "soon" | "due";
 
 const KEY = "items";
 
-export const lastMark = (i: Item): string | null => i.marks[0] ?? null;
+export const lastMark = (i: Item): Mark | null => i.marks[0] ?? null;
 export const daysOf = (i: Item, now?: Date): number | null =>
-  i.marks[0] ? daysSince(i.marks[0], now) : null;
+  i.marks[0] ? daysSince(i.marks[0].at, now) : null;
 
 /**
  * Как часто человек делает это на самом деле: медиана промежутков между
@@ -47,7 +52,7 @@ export const daysOf = (i: Item, now?: Date): number | null =>
  */
 export function typicalInterval(i: Item): number | null {
   if (i.marks.length < 3) return null;
-  const times = i.marks.map((m) => new Date(m).getTime()).sort((a, b) => b - a);
+  const times = i.marks.map((m) => new Date(m.at).getTime()).sort((a, b) => b - a);
   const gaps: number[] = [];
   for (let k = 1; k < times.length; k++) gaps.push(Math.round((times[k - 1] - times[k]) / 864e5));
   const clean = gaps.filter((g) => g > 0);
@@ -88,21 +93,48 @@ export function sortItems(items: Item[], now?: Date): Item[] {
   });
 }
 
+/** Сортировки из шита «Вид». «recent» — та же, что по умолчанию. */
+export function orderBy(items: Item[], sort: "recent" | "alpha" | "due", now?: Date): Item[] {
+  if (sort === "alpha") return [...items].sort((a, b) => a.title.localeCompare(b.title, "ru"));
+  if (sort === "due") {
+    const left = (i: Item) => {
+      const e = expected(i);
+      if (!e) return Infinity; // без срока торопиться некуда
+      return e - (daysOf(i, now) ?? e * 10);
+    };
+    return [...items].sort((a, b) => left(a) - left(b));
+  }
+  return sortItems(items, now);
+}
+
+/** Пункты по категориям, пустые категории опущены, порядок внутри сохранён. */
+export function byCategory(items: Item[]): { id: CategoryId; title: string; items: Item[] }[] {
+  return CATEGORIES.map((c) => ({ ...c, items: items.filter((i) => i.category === c.id) })).filter(
+    (g) => g.items.length > 0,
+  );
+}
+
 export const dueCount = (items: Item[], now?: Date) =>
   items.filter((i) => status(i, now) === "due").length;
 
 /* ------------------------------ хранилище ------------------------------ */
 
-type Legacy = Item & { lastAt?: string | null };
+type Legacy = Omit<Item, "marks"> & { lastAt?: string | null; marks?: (string | Mark)[] };
 
-/** Первая версия хранила одну дату вместо истории. */
+/**
+ * Первая версия хранила одну дату вместо истории, вторая — список строк.
+ * Обе читаются: терять чужие данные при обновлении нельзя.
+ */
 function migrate(raw: Legacy[]): Item[] {
   return raw.map((i) => ({
     id: i.id,
     title: i.title,
     category: i.category ?? "other",
     everyDays: i.everyDays,
-    marks: i.marks ?? (i.lastAt ? [i.lastAt] : []),
+    note: i.note,
+    marks: (i.marks ?? (i.lastAt ? [i.lastAt] : [])).map((m) =>
+      typeof m === "string" ? { at: m } : m,
+    ),
     createdAt: i.createdAt ?? new Date().toISOString(),
   }));
 }
@@ -125,13 +157,14 @@ const newId = () => String(Date.now()) + Math.random().toString(36).slice(2, 6);
 
 export async function addItem(
   title: string,
-  opts: { category?: CategoryId; everyDays?: number; marks?: string[] } = {},
+  opts: { category?: CategoryId; everyDays?: number; note?: string; marks?: Mark[] } = {},
 ): Promise<Item[]> {
   const item: Item = {
     id: newId(),
     title: title.trim(),
     category: opts.category ?? "other",
     everyDays: opts.everyDays,
+    note: opts.note,
     marks: opts.marks ?? [],
     createdAt: new Date().toISOString(),
   };
@@ -150,20 +183,37 @@ export const daysAgoIso = (daysAgo = 0) => new Date(Date.now() - daysAgo * 864e5
  * Отметить. Момент передаётся явно, чтобы отмену можно было снять именно с той
  * отметки, которую поставили, а не с той, что оказалась сверху.
  */
-export async function mark(id: string, when: string = daysAgoIso()): Promise<Item[]> {
+export async function mark(id: string, when: string = daysAgoIso(), note?: string): Promise<Item[]> {
   const items = await readItems();
   return write(
     items.map((i) =>
       i.id === id
-        ? { ...i, marks: [when, ...i.marks].sort((a, b) => +new Date(b) - +new Date(a)).slice(0, 200) }
+        ? {
+            ...i,
+            marks: [{ at: when, note }, ...i.marks]
+              .sort((a, b) => +new Date(b.at) - +new Date(a.at))
+              .slice(0, 200),
+          }
         : i,
     ),
   );
 }
 
-export async function unmark(id: string, iso: string): Promise<Item[]> {
+export async function unmark(id: string, at: string): Promise<Item[]> {
   const items = await readItems();
-  return write(items.map((i) => (i.id === id ? { ...i, marks: i.marks.filter((m) => m !== iso) } : i)));
+  return write(items.map((i) => (i.id === id ? { ...i, marks: i.marks.filter((m) => m.at !== at) } : i)));
+}
+
+/** Приписка к конкретной отметке: что было в тот раз. */
+export async function setMarkNote(id: string, at: string, note: string): Promise<Item[]> {
+  const items = await readItems();
+  return write(
+    items.map((i) =>
+      i.id === id
+        ? { ...i, marks: i.marks.map((m) => (m.at === at ? { ...m, note: note.trim() || undefined } : m)) }
+        : i,
+    ),
+  );
 }
 
 export async function removeItem(id: string): Promise<Item[]> {

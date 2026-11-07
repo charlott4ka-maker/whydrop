@@ -3,20 +3,22 @@
 // на пяти пунктах и то и другое было бы лишним шумом.
 
 import { useFocusEffect, useRouter } from "expo-router";
-import { Clock, Search, Settings2 } from "lucide-react-native";
+import { Clock, LayoutGrid, Search, Settings2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ItemRow } from "../components/ItemRow";
 import { ItemSheet } from "../components/ItemSheet";
+import { ViewSheet } from "../components/ViewSheet";
 import { toast } from "../components/Toast";
 import { Chip, Empty, GlassCircle, HeaderAdd, Pill, ScreenTitle, Segmented, Txt } from "../components/ui";
 import { haptic } from "../lib/haptics";
 import {
-  addItem, daysAgoIso, dueCount, mark, readItems, removeItem, restoreItem, sortItems, status, unmark,
-  type Item,
+  addItem, byCategory, daysAgoIso, dueCount, mark, orderBy, readItems, removeItem, restoreItem, status,
+  unmark, type Item,
 } from "../lib/items";
+import { usePrefs } from "../lib/prefs";
 import { C } from "../theme/tokens";
 
 const SUGGEST = [
@@ -40,6 +42,8 @@ export default function Home() {
   const [editing, setEditing] = useState<Item | "new" | null>(null);
   const [tab, setTab] = useState<"all" | "due">("all");
   const [query, setQuery] = useState("");
+  const [viewSheet, setViewSheet] = useState(false);
+  const prefs = usePrefs();
 
   useFocusEffect(
     useCallback(() => {
@@ -80,7 +84,8 @@ export default function Home() {
   const found = all.filter((i) =>
     query.trim() ? i.title.toLowerCase().includes(query.trim().toLowerCase()) : true,
   );
-  const list = sortItems(tab === "due" ? found.filter((i) => status(i) === "due") : found);
+  const list = orderBy(tab === "due" ? found.filter((i) => status(i) === "due") : found, prefs.sort);
+  const groups = prefs.group ? byCategory(list) : null;
 
   return (
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
@@ -95,6 +100,9 @@ export default function Home() {
           title="Когда"
           right={
             <View className="flex-row gap-2">
+              <GlassCircle size={52} onPress={() => setViewSheet(true)} label="Вид списка">
+                <LayoutGrid size={22} color={C.t1} />
+              </GlassCircle>
               <GlassCircle size={52} onPress={() => router.push("/settings")} label="Настройки">
                 <Settings2 size={22} color={C.t1} />
               </GlassCircle>
@@ -155,13 +163,23 @@ export default function Home() {
               <Txt className="px-1 pt-4 text-[15px] text-t3">
                 {query.trim() ? "Ничего не нашлось." : "Сейчас ничего не просрочено."}
               </Txt>
+            ) : groups ? (
+              groups.map((g) => (
+                <View key={g.id} className="gap-3">
+                  <Txt className="px-4 font-m600 text-[13px] uppercase text-t2" style={{ letterSpacing: 0.4 }}>
+                    {g.title}
+                  </Txt>
+                  <Grid items={g.items} view={prefs.view} onDone={done} />
+                </View>
+              ))
             ) : (
-              list.map((item) => <ItemRow key={item.id} item={item} onDone={() => done(item)} />)
+              <Grid items={list} view={prefs.view} onDone={done} />
             )}
           </>
         )}
       </ScrollView>
 
+      <ViewSheet visible={viewSheet} onClose={() => setViewSheet(false)} />
       <ItemSheet
         item={editing}
         onClose={() => setEditing(null)}
@@ -171,6 +189,33 @@ export default function Home() {
           drop(i);
         }}
       />
+    </View>
+  );
+}
+
+/** Плитки идут в два столбца, остальные виды — в один. */
+function Grid({ items, view, onDone }: { items: Item[]; view: "big" | "rows" | "tiles"; onDone: (i: Item) => void }) {
+  if (view !== "tiles") {
+    return (
+      <View className={view === "rows" ? "gap-2" : "gap-4"}>
+        {items.map((i) => (
+          <ItemRow key={i.id} item={i} view={view} onDone={() => onDone(i)} />
+        ))}
+      </View>
+    );
+  }
+  const rows: Item[][] = [];
+  for (let k = 0; k < items.length; k += 2) rows.push(items.slice(k, k + 2));
+  return (
+    <View className="gap-3">
+      {rows.map((row) => (
+        <View key={row[0].id} className="flex-row gap-3">
+          {row.map((i) => (
+            <ItemRow key={i.id} item={i} view="tiles" onDone={() => onDone(i)} />
+          ))}
+          {row.length === 1 ? <View className="flex-1" /> : null}
+        </View>
+      ))}
     </View>
   );
 }

@@ -1,4 +1,6 @@
-import { dueCount, expected, sortItems, status, typicalInterval, type Item } from "../items";
+import {
+  byCategory, dueCount, expected, orderBy, sortItems, status, typicalInterval, type Item,
+} from "../items";
 
 const now = new Date("2026-11-07T12:00:00");
 const ago = (days: number) => new Date(now.getTime() - days * 864e5).toISOString();
@@ -8,7 +10,7 @@ const item = (title: string, marks: number[], everyDays?: number): Item => ({
   title,
   category: "other",
   everyDays,
-  marks: marks.map(ago),
+  marks: marks.map((d) => ({ at: ago(d) })),
   createdAt: ago(900),
 });
 
@@ -99,5 +101,44 @@ describe("sortItems", () => {
 describe("dueCount", () => {
   it("counts only what is actually due", () => {
     expect(dueCount([item("a", [35], 30), item("b", [2], 30), item("c", [900])], now)).toBe(1);
+  });
+});
+
+describe("orderBy", () => {
+  const list = [
+    item("бабушка", [9]),
+    item("линзы", [26], 30),
+    item("шторы", [212]),
+    item("стоматолог", [408], 365),
+  ];
+
+  it("alpha sorts the Russian way", () => {
+    expect(orderBy(list, "alpha", now).map((i) => i.title)).toEqual([
+      "бабушка", "линзы", "стоматолог", "шторы",
+    ]);
+  });
+
+  it("due puts the nearest deadline first and the dateless last", () => {
+    // стоматологу просрочено 43 дня, линзам осталось 4
+    expect(orderBy(list, "due", now).map((i) => i.title).slice(0, 2)).toEqual(["стоматолог", "линзы"]);
+    expect(orderBy(list, "due", now).slice(2).every((i) => !i.everyDays)).toBe(true);
+  });
+
+  it("recent is the default order", () => {
+    expect(orderBy(list, "recent", now)).toEqual(sortItems(list, now));
+  });
+});
+
+describe("byCategory", () => {
+  it("keeps only the categories that have something in them", () => {
+    const a = { ...item("линзы", [1]), category: "body" as const };
+    const b = { ...item("шторы", [2]), category: "home" as const };
+    expect(byCategory([a, b]).map((g) => g.id)).toEqual(["home", "body"]);
+  });
+
+  it("keeps the order it was given inside a category", () => {
+    const a = { ...item("раз", [1]), category: "home" as const };
+    const b = { ...item("два", [2]), category: "home" as const };
+    expect(byCategory([a, b])[0].items.map((i) => i.title)).toEqual(["раз", "два"]);
   });
 });

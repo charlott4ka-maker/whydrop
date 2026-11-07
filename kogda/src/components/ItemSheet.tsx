@@ -33,6 +33,7 @@ export function ItemSheet({
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<CategoryId>("other");
   const [every, setEvery] = useState<number | undefined>(undefined);
+  const [note, setNote] = useState("");
   const [error, setError] = useState<string | false>(false);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function ItemSheet({
     setTitle(current?.title ?? "");
     setCategory(current?.category ?? "other");
     setEvery(current?.everyDays);
+    setNote(current?.note ?? "");
     setError(false);
   }, [item]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -50,9 +52,10 @@ export function ItemSheet({
       return;
     }
     haptic("light");
+    const clean = note.trim() || undefined;
     const p = current
-      ? updateItem(current.id, { title: title.trim(), category, everyDays: every })
-      : addItem(title, { category, everyDays: every });
+      ? updateItem(current.id, { title: title.trim(), category, everyDays: every, note: clean })
+      : addItem(title, { category, everyDays: every, note: clean });
     p.then(onSaved).catch(() => {});
     onClose();
   };
@@ -92,6 +95,20 @@ export function ItemSheet({
       <Txt className="mt-3 text-[13px] leading-[18px] text-t3">
         С «приложение само» срок не задаётся: после трёх отметок станет видно, как часто ты это делаешь на самом деле, и приложение начнёт считать по этому.
       </Txt>
+
+      <View className="mt-6">
+        <Field
+          label="Заметка"
+          value={note}
+          onChangeText={setNote}
+          placeholder="Фильтр Aquaphor B100, менять вместе с картриджем"
+          autoCapitalize="sentences"
+          multiline
+        />
+        <Txt className="text-[13px] leading-[18px] text-t3">
+          То, что пригодится в следующий раз: модель, адрес, телефон мастера.
+        </Txt>
+      </View>
 
       <View className="mt-6 gap-3">
         <Pill full onPress={save}>{isNew ? "Добавить" : "Сохранить"}</Pill>

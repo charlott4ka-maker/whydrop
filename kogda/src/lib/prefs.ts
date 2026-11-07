@@ -3,13 +3,21 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSyncExternalStore } from "react";
 
+/** Как показывать список. Крупно — по умолчанию, строки — когда пунктов много. */
+export type View = "big" | "rows" | "tiles";
+export type Sort = "recent" | "alpha" | "due";
+
 export type Prefs = {
   /** приветствие показывается один раз */
   onboarded: boolean;
   haptics: boolean;
+  view: View;
+  /** раскладывать по категориям */
+  group: boolean;
+  sort: Sort;
 };
 
-const DEFAULTS: Prefs = { onboarded: false, haptics: true };
+const DEFAULTS: Prefs = { onboarded: false, haptics: true, view: "big", group: false, sort: "recent" };
 const KEY = "prefs";
 
 let prefs: Prefs = DEFAULTS;

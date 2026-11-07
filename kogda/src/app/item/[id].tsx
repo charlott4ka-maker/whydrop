@@ -1,20 +1,21 @@
-// Отдельный пункт: давность крупно, история отметок и всё, что с ней можно
-// сделать. История здесь не украшение: по ней приложение и понимает, как часто
-// ты это делаешь на самом деле.
+// Отдельный пункт: давность крупно, заметка, история отметок и всё, что с ней
+// можно сделать. История здесь не украшение: по ней приложение и понимает, как
+// часто ты это делаешь на самом деле.
 
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Check, ChevronLeft, Minus, Pencil, Plus, Trash2 } from "lucide-react-native";
+import { Check, ChevronLeft, Pencil, Trash2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Calendar } from "../../components/Calendar";
 import { ItemSheet } from "../../components/ItemSheet";
 import { toast } from "../../components/Toast";
-import { Card, GlassCircle, Pill, Sheet, Txt } from "../../components/ui";
+import { Card, Field, GlassCircle, Pill, Sheet, Txt } from "../../components/ui";
 import { haptic } from "../../lib/haptics";
 import {
-  CATEGORIES, daysAgoIso, daysOf, expected, mark, readItems, removeItem, status, typicalInterval,
-  unmark, type Item,
+  CATEGORIES, daysAgoIso, daysOf, expected, mark, readItems, removeItem, setMarkNote, status,
+  typicalInterval, unmark, type Item, type Mark,
 } from "../../lib/items";
 import { ago, dateLabel, daysSince, daysWord, everyLabel, marksWord, rough } from "../../lib/time";
 import { C } from "../../theme/tokens";
@@ -25,8 +26,10 @@ export default function ItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [item, setItem] = useState<Item | null | "missing">(null);
   const [editing, setEditing] = useState<Item | "new" | null>(null);
-  const [backdating, setBackdating] = useState(false);
-  const [daysBack, setDaysBack] = useState(1);
+  const [picking, setPicking] = useState(false);
+  const [pickDate, setPickDate] = useState(new Date());
+  const [noting, setNoting] = useState<Mark | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
 
   const reload = useCallback(() => {
     readItems()
@@ -55,11 +58,6 @@ export default function ItemScreen() {
         }),
       )
       .catch(() => {});
-  };
-
-  const drop = () => {
-    haptic("warning");
-    removeItem(id).then(() => router.back()).catch(() => {});
   };
 
   const days = item ? daysOf(item) : null;
@@ -113,7 +111,12 @@ export default function ItemScreen() {
                   <Txt className="text-[17px] text-t2">{a.unit}</Txt>
                 </View>
               )}
-              {r ? <Txt className="mt-1 text-[13px] text-t3">{r}</Txt> : null}
+              {item.marks[0] ? (
+                <Txt className="mt-1 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
+                  {dateLabel(item.marks[0].at)}
+                  {r ? ` · ${r}` : ""}
+                </Txt>
+              ) : null}
               {every ? (
                 <Txt className="mt-3 text-[15px] text-t2">
                   {item.everyDays ? "Срок: " : "Обычно "}
@@ -127,39 +130,58 @@ export default function ItemScreen() {
               )}
             </Card>
 
+            {item.note ? (
+              <Card className="p-4" onPress={() => setEditing(item)}>
+                <Txt className="text-[13px] text-t2">Заметка</Txt>
+                <Txt className="mt-1 text-[15px] leading-[21px]">{item.note}</Txt>
+              </Card>
+            ) : null}
+
             <View className="gap-3">
               <Pill full onPress={() => put(daysAgoIso(), "Отмечено сегодня")} icon={<Check size={18} color={C.onLime} />}>
                 Отметить сегодня
               </Pill>
-              <Pill full kind="ghost" onPress={() => { setDaysBack(1); setBackdating(true); }}>
-                Другой датой
+              <Pill
+                full
+                kind="ghost"
+                onPress={() => {
+                  setPickDate(new Date());
+                  setPicking(true);
+                }}
+              >
+                Выбрать дату
               </Pill>
             </View>
 
             <View>
               <Txt className="mb-3 px-4 font-m600 text-[13px] uppercase text-t2" style={{ letterSpacing: 0.4 }}>
-                {item.marks.length
-                  ? `${item.marks.length} ${marksWord(item.marks.length)}`
-                  : "Отметок пока нет"}
+                {item.marks.length ? `${item.marks.length} ${marksWord(item.marks.length)}` : "Отметок пока нет"}
               </Txt>
               {item.marks.length ? (
                 <View className="overflow-hidden rounded-card bg-card">
                   {item.marks.map((m, i) => (
-                    <View key={m}>
+                    <View key={m.at}>
                       {i > 0 ? <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginLeft: 16 }} /> : null}
                       <View className="flex-row items-center gap-3 px-4 py-3">
-                        <View className="flex-1">
-                          <Txt className="text-[15px]">{dateLabel(m)}</Txt>
+                        <Card
+                          className="flex-1 bg-transparent"
+                          onPress={() => {
+                            setNoting(m);
+                            setNoteDraft(m.note ?? "");
+                          }}
+                        >
+                          <Txt className="text-[15px]">{dateLabel(m.at)}</Txt>
                           <Txt className="mt-1 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
                             {gapLabel(item.marks, i)}
                           </Txt>
-                        </View>
+                          {m.note ? <Txt className="mt-1 text-[13px] text-t2">{m.note}</Txt> : null}
+                        </Card>
                         <GlassCircle
                           size={40}
-                          label={"Убрать отметку " + dateLabel(m)}
+                          label={"Убрать отметку " + dateLabel(m.at)}
                           onPress={() => {
                             haptic("warning");
-                            unmark(id, m).then(() => reload()).catch(() => {});
+                            unmark(id, m.at).then(() => reload()).catch(() => {});
                           }}
                         >
                           <Trash2 size={18} color={C.t2} />
@@ -169,54 +191,66 @@ export default function ItemScreen() {
                   ))}
                 </View>
               ) : null}
-              {guessed && !item.everyDays ? (
-                <Txt className="mt-3 px-4 text-[13px] leading-[18px] text-t3">
-                  Промежутки считаются по медиане, поэтому один пропущенный год не портит картину.
-                </Txt>
-              ) : null}
+              <Txt className="mt-3 px-4 text-[13px] leading-[18px] text-t3">
+                {guessed && !item.everyDays
+                  ? "Промежутки считаются по медиане, поэтому один пропущенный год не портит картину."
+                  : "Тап по отметке добавит к ней приписку: что было в тот раз."}
+              </Txt>
             </View>
 
-            <Pill full kind="ghost" onPress={drop}>
+            <Pill
+              full
+              kind="ghost"
+              onPress={() => {
+                haptic("warning");
+                removeItem(id).then(() => router.back()).catch(() => {});
+              }}
+            >
               <Txt className="font-m600 text-base text-danger">Удалить пункт</Txt>
             </Pill>
           </>
         )}
       </ScrollView>
 
-      <Sheet visible={backdating} title="Когда это было" onClose={() => setBackdating(false)}>
-        <View className="items-center">
-          <Txt className="font-m800" style={{ fontSize: 56, letterSpacing: -2, fontVariant: ["tabular-nums"] }}>
-            {daysBack}
-          </Txt>
-          <Txt className="mt-1 text-[15px] text-t2">{daysWord(daysBack)} назад</Txt>
-          <Txt className="mt-1 text-[13px] text-t3">{dateLabel(daysAgoIso(daysBack))}</Txt>
-          <View className="mt-6 flex-row items-center gap-4">
-            <GlassCircle size={52} label="Меньше" onPress={() => { haptic("select"); setDaysBack((d) => Math.max(1, d - 1)); }}>
-              <Minus size={24} color={C.t1} />
-            </GlassCircle>
-            <GlassCircle size={52} label="Больше" onPress={() => { haptic("select"); setDaysBack((d) => Math.min(3650, d + 1)); }}>
-              <Plus size={24} color={C.t1} />
-            </GlassCircle>
-          </View>
-        </View>
-        <View className="mt-6 flex-row flex-wrap gap-2">
-          {[7, 14, 30, 90, 180, 365].map((d) => (
-            <Pill key={d} size="sm" kind="ghost" onPress={() => { haptic("select"); setDaysBack(d); }}>
-              {everyLabel(d).replace("раз в ", "")}
-            </Pill>
-          ))}
-        </View>
+      <Sheet visible={picking} title="Когда это было" onClose={() => setPicking(false)}>
+        <Calendar value={pickDate} onChange={setPickDate} />
+        <Txt className="mt-4 text-center text-[15px] text-t2">
+          {dateLabel(pickDate.toISOString())} · {daysSince(pickDate.toISOString())} {daysWord(daysSince(pickDate.toISOString()))} назад
+        </Txt>
         <View className="mt-6">
           <Pill
             full
             onPress={() => {
-              setBackdating(false);
-              put(daysAgoIso(daysBack), "Отмечено: " + dateLabel(daysAgoIso(daysBack)));
+              setPicking(false);
+              const at = new Date(pickDate);
+              at.setHours(12, 0, 0, 0);
+              put(at.toISOString(), "Отмечено: " + dateLabel(at.toISOString()));
             }}
           >
             Отметить
           </Pill>
         </View>
+      </Sheet>
+
+      <Sheet visible={noting !== null} title={noting ? dateLabel(noting.at) : ""} onClose={() => setNoting(null)}>
+        <Field
+          label="Что было в тот раз"
+          value={noteDraft}
+          onChangeText={setNoteDraft}
+          placeholder="У Иры, 3000"
+          autoCapitalize="sentences"
+          multiline
+        />
+        <Pill
+          full
+          onPress={() => {
+            const target = noting;
+            setNoting(null);
+            if (target) setMarkNote(id, target.at, noteDraft).then(() => reload()).catch(() => {});
+          }}
+        >
+          Сохранить
+        </Pill>
       </Sheet>
 
       <ItemSheet item={editing} onClose={() => setEditing(null)} onSaved={() => reload()} />
@@ -225,9 +259,9 @@ export default function ItemScreen() {
 }
 
 /** Сколько прошло между этой отметкой и предыдущей по времени. */
-function gapLabel(marks: string[], i: number): string {
+function gapLabel(marks: Mark[], i: number): string {
   const next = marks[i + 1];
   if (!next) return "первая отметка";
-  const gap = daysSince(next, new Date(marks[i]));
+  const gap = daysSince(next.at, new Date(marks[i].at));
   return `через ${gap} ${daysWord(gap)}`;
 }
