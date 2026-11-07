@@ -6,13 +6,13 @@
  */
 module.exports = (config) => ({
   type: "widget",
-  name: "Сто лет",
+  name: "Ago",
   icon: "../../assets/icon.png",
   colors: {
     $accent: "#C8FF4A",
     $background: "#0B0B0C",
   },
   entitlements: {
-    "com.apple.security.application-groups": ["group.app.stolet.ios"],
+    "com.apple.security.application-groups": ["group.app.ago.ios"],
   },
 });

@@ -1,4 +1,4 @@
-// Виджет «Сто лет»: сколько дней прошло с того, что делаешь редко.
+// Виджет Ago: сколько дней прошло с того, что делаешь редко.
 //
 // Дни считаются здесь, а не в приложении: виджет обновляется сам по таймлайну,
 // и если положить в него готовое число, оно замрёт на дне последнего запуска.
@@ -7,7 +7,7 @@
 import WidgetKit
 import SwiftUI
 
-private let groupId = "group.app.stolet.ios"
+private let groupId = "group.app.ago.ios"
 private let storeKey = "widget"
 
 // MARK: - данные
@@ -156,7 +156,7 @@ struct Line: View {
 struct Empty: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Сто лет")
+            Text("Ago")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.white)
             Text("Добавь, что делаешь редко")
@@ -191,12 +191,12 @@ struct WidgetView: View {
 }
 
 @main
-struct StoLetWidget: Widget {
+struct AgoWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "StoLetWidget", provider: Provider()) { entry in
+        StaticConfiguration(kind: "AgoWidget", provider: Provider()) { entry in
             WidgetView(entry: entry)
         }
-        .configurationDisplayName("Сто лет")
+        .configurationDisplayName("Ago")
         .description("Сколько прошло с того, что делаешь редко.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }

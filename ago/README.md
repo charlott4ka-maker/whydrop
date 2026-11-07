@@ -1,4 +1,4 @@
-# Сто лет
+# Ago
 
 Сколько прошло с тех пор, как ты делала то, что делаешь редко. Поменяла линзы,
 постирала шторы, была у стоматолога, звонила бабушке. Одна строка, крупная
@@ -72,7 +72,7 @@ npm test
 ### Что нужно сделать руками один раз
 
 ```bash
-cd stolet
+cd ago
 npm install                       # ставит @bacons/apple-targets
 rm src/types/apple-targets.d.ts   # у пакета свои типы, заглушка больше не нужна
 npx expo prebuild --clean         # создаёт ios/ с целью виджета
@@ -81,7 +81,7 @@ npm run build:dev                 # или npx expo run:ios
 
 Перед этим в `app.json` заменить `appleTeamId` на свой Team ID: он виден на
 developer.apple.com в разделе Membership. Группа приложений
-`group.app.stolet.ios` объявлена и у приложения, и у виджета — её надо завести
+`group.app.ago.ios` объявлена и у приложения, и у виджета — её надо завести
 в Certificates, Identifiers & Profiles, иначе сборка не подпишется.
 
 Добавление цели меняет провижининг, поэтому первая сборка в EAS должна быть

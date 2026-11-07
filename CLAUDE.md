@@ -19,7 +19,7 @@ rules below come from.
   endpoint must never be named that way.
 
 ## Layout
-- Two apps live here. `mobile/` is **whydrop**; `stolet/` is **Сто лет**, a second,
+- Two apps live here. `mobile/` is **whydrop**; `ago/` is **Ago**, a second,
   much smaller app (how long since you last did something). They share the design
   system by copy, not by package: `src/components/ui.tsx`, `src/theme/tokens.ts`
   and the Tailwind config are the same files in both. Change one and decide
@@ -29,7 +29,7 @@ rules below come from.
   a bundle. Everything else the app asks Instagram for itself, refresh included
   (`refresh_access_token` takes no secret).
 
-## UI rules (mobile/src, stolet/src)
+## UI rules (mobile/src, ago/src)
 - Font: the iOS system font SF Pro, weights 500-800 only. Never Regular (400);
   `font-m500`..`font-m800` are the class names.
 - Buttons and controls come in exactly two heights: `H.lg` (52) and `H.sm` (40).
@@ -107,7 +107,7 @@ rules below come from.
 - Until App Review passes, only Instagram accounts added as testers in the app
   (and accepted from inside Instagram) can connect.
 
-## Сто лет (stolet/)
+## Ago (ago/)
 - Three tabs on the **system** tab bar, so iOS 26 gives it real Liquid Glass
   instead of an imitation. Glass goes on the floating navigation layer only,
   never on cards: Apple's own guidance, and glass on glass turns to mush.

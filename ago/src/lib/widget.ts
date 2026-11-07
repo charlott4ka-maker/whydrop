@@ -6,7 +6,7 @@ import { ExtensionStorage } from "@bacons/apple-targets";
 
 import { expected, sortItems, type Item } from "./items";
 
-const GROUP = "group.app.stolet.ios";
+const GROUP = "group.app.ago.ios";
 const KEY = "widget";
 /** Больше трёх строк не помещается даже в средний виджет. */
 const LIMIT = 3;

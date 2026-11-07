@@ -79,7 +79,7 @@ export default function ItemScreen() {
         : `${item.title}: ${days} ${daysWord(days)} назад.`,
       r ? r[0].toUpperCase() + r.slice(1) + "." : "",
       "",
-      "Считает приложение «Сто лет»",
+      "Считает приложение Ago",
     ].filter(Boolean);
     try {
       await Share.share({ message: lines.join("\n") });
