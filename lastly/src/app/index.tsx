@@ -80,7 +80,7 @@ export default function Home() {
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 12 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 16 }}
         showsVerticalScrollIndicator={false}
       >
         <ScreenTitle
