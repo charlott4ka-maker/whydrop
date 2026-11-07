@@ -1,4 +1,4 @@
-import { ago, daysSince, daysWord, rough } from "../time";
+import { ago, dateLabel, daysSince, daysWord, everyLabel, rough } from "../time";
 
 const at = (s: string) => new Date(s).toISOString();
 
@@ -56,5 +56,30 @@ describe("rough", () => {
     expect(rough(210)).toBe("это 7 месяцев");
     expect(rough(365)).toBe("это 1 год");
     expect(rough(400)).toBe("это 1 год и 1 месяц");
+  });
+});
+
+describe("everyLabel", () => {
+  it("says it the way a person would", () => {
+    expect(everyLabel(7)).toBe("раз в неделю");
+    expect(everyLabel(30)).toBe("раз в месяц");
+    expect(everyLabel(31)).toBe("раз в месяц");
+    expect(everyLabel(90)).toBe("раз в 3 месяца");
+    expect(everyLabel(365)).toBe("раз в год");
+  });
+
+  it("falls back to days when the number is nothing round", () => {
+    expect(everyLabel(34)).toBe("раз в 34 дня");
+    expect(everyLabel(41)).toBe("раз в 41 день");
+  });
+});
+
+describe("dateLabel", () => {
+  const now = new Date("2026-11-07T12:00:00");
+  it("leaves out the year while it is this year", () => {
+    expect(dateLabel("2026-11-04T10:00:00", now)).toBe("4 ноября");
+  });
+  it("adds the year once it is not", () => {
+    expect(dateLabel("2025-03-02T10:00:00", now)).toBe("2 марта 2025");
   });
 });

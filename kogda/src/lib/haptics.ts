@@ -1,9 +1,11 @@
-// Настроек пока нет: как только появится выключатель вибрации, он встанет сюда.
 import * as Haptics from "expo-haptics";
+
+import { getPrefs } from "./prefs";
 
 export type HapticKind = "light" | "select" | "success" | "warning" | "error";
 
 export function haptic(kind: HapticKind = "light") {
+  if (!getPrefs().haptics) return;
   const run = () => {
     switch (kind) {
       case "select":

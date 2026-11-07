@@ -19,7 +19,7 @@ rules below come from.
   endpoint must never be named that way.
 
 ## Layout
-- Two apps live here. `mobile/` is **whydrop**; `lastly/` is **Давно**, a second,
+- Two apps live here. `mobile/` is **whydrop**; `kogda/` is **Когда**, a second,
   much smaller app (how long since you last did something). They share the design
   system by copy, not by package: `src/components/ui.tsx`, `src/theme/tokens.ts`
   and the Tailwind config are the same files in both. Change one and decide
@@ -29,7 +29,7 @@ rules below come from.
   a bundle. Everything else the app asks Instagram for itself, refresh included
   (`refresh_access_token` takes no secret).
 
-## UI rules (mobile/src, lastly/src)
+## UI rules (mobile/src, kogda/src)
 - Font: the iOS system font SF Pro, weights 500-800 only. Never Regular (400);
   `font-m500`..`font-m800` are the class names.
 - Buttons and controls come in exactly two heights: `H.lg` (52) and `H.sm` (40).
@@ -95,6 +95,14 @@ rules below come from.
   "expired". It lives in SecureStore.
 - Until App Review passes, only Instagram accounts added as testers in the app
   (and accepted from inside Instagram) can connect.
+
+## Когда (kogda/)
+- The app keeps every mark, not just the last date, and reads the habit off
+  them: the median gap over at least three marks. Median, not mean, so one
+  skipped year does not rewrite what "usually" means. A hand-set interval always
+  wins over the guessed one.
+- It is not a habit tracker and must never nag. It answers a question the person
+  already has, which is why there are no goals, no streaks and no guilt.
 
 ## Streak and analytics
 - The streak is computed from history (`mobile/src/lib/streak.ts`), never
