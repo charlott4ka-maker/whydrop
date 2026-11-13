@@ -171,6 +171,21 @@ rules below come from.
   things it sells are the unlimited list, the widget, the alternate app icon
   and plain support; a one-off price, no subscription.
 
+## Ago's mascot and art
+- Ago has a character: a white doodle cat holding a clock, thick black outline,
+  on a lime tile. It is the app icon, and the square is the icon: no rounded
+  corners in the artwork, because iOS applies its own mask. The logo lives in
+  the Figma file; the vector redraw sits next to it in the "Ago / Иконка"
+  section.
+- The screens carry two illustrated banners in that same hand: a bathroom shelf
+  on the пункт screen and a roadside scene on Итоги. They are colourful, with
+  flat fills inside a heavy outline, and their top edge is pure black so they
+  butt against the page with no seam.
+- Generate art from the reference, never from a description of it. Attach the
+  mascot (and the scene reference where there is one) to the request, and say
+  only what changes. Describing the style in words gives something that merely
+  resembles it, and the cat comes back different every time.
+
 ## Ago's look (Mononote, not whydrop)
 - Ago does not inherit whydrop's look, only its tokens and its icon rules. The
   reference is Mononote, and its surfaces are not a hand-made gradient: they
