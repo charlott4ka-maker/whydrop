@@ -206,6 +206,13 @@ rules below come from.
   glyph at 22, the label at 17, the value in grey, a chevron at the right, and
   a hairline (white 10%) between rows inset to the label. No coloured tiles
   here: that is a whydrop pattern, and Mononote's plain glyphs read calmer.
+- The menus are the system's, not ours. A dropdown is an iOS context menu and
+  is drawn as one: 250 wide, radius 14, rows of 44 with the label left at 17
+  and the SF-style symbol on the right, hairline separators across the full
+  width with no inset, and the background dimmed behind it. A disabled row is
+  the whole row at 40% with a lock on the right, which is how iOS says locked;
+  no caption underneath explaining it. Nothing in a menu is ours to invent:
+  if iOS does it differently, iOS wins.
 - Hints belong to Настройки and nowhere else: 15, `#8E8E93`, under the group
   they explain, one line where it can be. The content screens carry none. A
   line under a list telling you to long-press to delete is the interface
