@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BottomBar, TopChrome } from "../components/Chrome";
 import { GlassPill, GlassRound } from "../components/Glass";
+import { ItemRow } from "../components/ItemRow";
 import { ItemSheet } from "../components/ItemSheet";
 import { Menu } from "../components/Menu";
 import { toast } from "../components/Toast";
@@ -165,14 +166,18 @@ export default function Home() {
           groups.map((g) => (
             <View key={g.title} className="gap-3">
               <Txt className="px-1 font-m600 text-[15px] text-t2">{g.title}</Txt>
-              <View className="overflow-hidden rounded-card bg-card">
-                {g.items.map((i, n) => (
-                  <View key={i.id}>
-                    {n > 0 ? <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginLeft: 18 }} /> : null}
-                    <Row item={i} onOpen={() => router.push(`/item/${i.id}`)} onDone={() => done(i)} onDrop={() => drop(i)} />
-                  </View>
-                ))}
-              </View>
+              {prefs.view === "rows" ? (
+                <View className="overflow-hidden rounded-card bg-card">
+                  {g.items.map((i, n) => (
+                    <View key={i.id}>
+                      {n > 0 ? <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginLeft: 18 }} /> : null}
+                      <Row item={i} onOpen={() => router.push(`/item/${i.id}`)} onDone={() => done(i)} onDrop={() => drop(i)} />
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Grid items={g.items} view={prefs.view} onDone={done} />
+              )}
             </View>
           ))
         )}
@@ -265,5 +270,32 @@ function Row({ item, onOpen, onDone, onDrop }: { item: Item; onOpen: () => void;
         {d == null ? "—" : `${d} ${daysWord(d)}`}
       </Txt>
     </Pressable>
+  );
+}
+
+/** Крупно — в один столбец, плитки — в два. Строки рисует Row внутри карточки. */
+function Grid({ items, view, onDone }: { items: Item[]; view: "big" | "tiles"; onDone: (i: Item) => void }) {
+  if (view !== "tiles") {
+    return (
+      <View className="gap-4">
+        {items.map((i) => (
+          <ItemRow key={i.id} item={i} view="big" onDone={() => onDone(i)} />
+        ))}
+      </View>
+    );
+  }
+  const rows: Item[][] = [];
+  for (let k = 0; k < items.length; k += 2) rows.push(items.slice(k, k + 2));
+  return (
+    <View className="gap-3">
+      {rows.map((row) => (
+        <View key={row[0].id} className="flex-row gap-3">
+          {row.map((i) => (
+            <ItemRow key={i.id} item={i} view="tiles" onDone={() => onDone(i)} />
+          ))}
+          {row.length === 1 ? <View className="flex-1" /> : null}
+        </View>
+      ))}
+    </View>
   );
 }
