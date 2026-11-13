@@ -156,9 +156,25 @@ rules below come from.
   with an undo in the toast.
 - Light theme and the "auto" setting. The prototype had a theme switcher; the
   app is dark only for now and the setting is not shown rather than shown dead.
-- Objects drifting behind the screens, and the setting that turns them off.
-  Glossy inflated 3D shapes on the near-black page, slowly floating back and
-  forth under the content: a crown, a pair of glasses, several pale blue stars
-  and one star that runs green into blue. They sit far enough back that text
-  over them still reads; the earlier idea of blurred colour blobs is replaced
-  by these.
+- Ago PRO, the paywall. Drawn in Figma ("6 Ago PRO" in the Ago section) and
+  agreed, but deliberately not in 1.0.0: it ships no earlier than 1.0.1, so
+  nothing in the app may link to it or gate a feature behind it yet. The four
+  things it sells are the unlimited list, the widget, the alternate app icon
+  and plain support; a one-off price, no subscription.
+
+## Ago's look (Mononote, not whydrop)
+- Ago does not inherit whydrop's look, only its tokens and its icon rules. The
+  reference is Mononote: a near black page, cards in glassy grey (a solid
+  `#161618` with a white gradient over it, about 8% down to 2.5%, so the top
+  edge catches light and nothing needs an outline), 22 radius, no borders.
+- Settings and most lists are grouped cards of 56pt rows: a plain white lucide
+  glyph at 22, the label at 17, the value in grey, a chevron at the right, and
+  a hairline (white 10%) between rows inset to the label. No coloured tiles
+  here: that is a whydrop pattern, and Mononote's plain glyphs read calmer.
+- Under a group sits a hint: 13, grey, one line where it can be. It explains
+  what the group does, which is why the screens need almost no onboarding.
+- Lime stays the one colour on the screen: the primary button, the selected
+  chip, a count that has run over. Everything else is white or grey.
+- The whole set lives in the "Ago" section of the Figma file
+  (`OKdtUU26JvHlAdwENH2gwZ`), ten screens, built from the same lucide icon
+  components as the app.
