@@ -43,7 +43,8 @@
     "test": "jest",
     "build:dev": "eas build --platform ios --profile development",
     "build:ios": "eas build --platform ios --profile production",
-    "go": "expo start --go --clear"
+    "go": "expo start --go --clear",
+    "tunnel": "expo start --go --clear --tunnel"
   },
   "private": true,
   "overrides": {
