@@ -164,14 +164,21 @@ rules below come from.
 
 ## Ago's look (Mononote, not whydrop)
 - Ago does not inherit whydrop's look, only its tokens and its icon rules. The
-  reference is Mononote: a near black page, cards in glassy grey (a solid
-  `#161618` with a white gradient over it, about 8% down to 2.5%, so the top
-  edge catches light and nothing needs an outline), 22 radius, no borders.
+  reference is Mononote, and its surfaces are not a hand-made gradient: they
+  are a real material. In Figma that is the Glass effect over a grey tint
+  (`#B2B2B2`), never a white one and never a stacked gradient, which is what
+  makes it read grey instead of milky. Radius 22, no stroke; the light angle
+  does the top edge on its own. Four weights, by what the surface is:
+  card 11% / glass 30 / depth 20, sheet 13% / 40 / 24, field and chip
+  17% / 20 / 14, round button 23% / 20 / 12. On a pure black page.
+- In code that is the system material, not a painted colour: `expo-blur` and
+  `expo-glass-effect` are already dependencies, so a card is a BlurView on a
+  dark tint, not a `bg-card` class.
 - Settings and most lists are grouped cards of 56pt rows: a plain white lucide
   glyph at 22, the label at 17, the value in grey, a chevron at the right, and
   a hairline (white 10%) between rows inset to the label. No coloured tiles
   here: that is a whydrop pattern, and Mononote's plain glyphs read calmer.
-- Under a group sits a hint: 13, grey, one line where it can be. It explains
+- Under a group sits a hint: 15, `#8E8E93`, one line where it can be. It explains
   what the group does, which is why the screens need almost no onboarding.
 - Lime stays the one colour on the screen: the primary button, the selected
   chip, a count that has run over. Everything else is white or grey.
