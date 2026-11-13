@@ -3,12 +3,15 @@
 // часто ты это делаешь на самом деле.
 
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Check, ChevronLeft, Pencil, Share2, Trash2 } from "lucide-react-native";
+import { Check, Pencil, Trash2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { ScrollView, Share, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Banner } from "../../components/Banner";
 import { Calendar } from "../../components/Calendar";
+import { NavBar } from "../../components/Chrome";
+import { GlassRound } from "../../components/Glass";
 import { Counter } from "../../components/Counter";
 import { ItemSheet } from "../../components/ItemSheet";
 import { toast } from "../../components/Toast";
@@ -71,42 +74,27 @@ export default function ItemScreen() {
   const guessed = item ? typicalInterval(item) : null;
   const next = item ? nextDue(item) : null;
 
-  const share = async () => {
-    if (!item) return;
-    const lines = [
-      days === null
-        ? `${item.title}: ещё ни разу.`
-        : `${item.title}: ${days} ${daysWord(days)} назад.`,
-      r ? r[0].toUpperCase() + r.slice(1) + "." : "",
-      "",
-      "Считает приложение Ago",
-    ].filter(Boolean);
-    try {
-      await Share.share({ message: lines.join("\n") });
-    } catch {}
-  };
   const category = item ? CATEGORIES.find((c) => c.id === item.category) : undefined;
 
   return (
-    <View className="flex-1" style={{ paddingTop: insets.top }}>
-      <View className="flex-row items-center gap-3 px-4 pb-2 pt-2">
-        <GlassCircle onPress={() => router.back()} label="Назад">
-          <ChevronLeft size={22} color={C.t1} />
-        </GlassCircle>
-        <Txt numberOfLines={1} className="flex-1 font-m800 text-[22px]">{item?.title ?? ""}</Txt>
-        <GlassCircle onPress={share} label="Поделиться">
-          <Share2 size={20} color={C.t1} />
-        </GlassCircle>
-        <GlassCircle onPress={() => item && setEditing(item)} label="Изменить">
-          <Pencil size={20} color={C.t1} />
-        </GlassCircle>
-      </View>
+    <View className="flex-1 bg-bg">
+      <NavBar
+        title={item?.title ?? ""}
+        onBack={() => router.back()}
+        right={
+          <GlassRound size={40} onPress={() => item && setEditing(item)} label="Изменить">
+            <Pencil size={20} color={C.t1} absoluteStrokeWidth strokeWidth={1.5} />
+          </GlassRound>
+        }
+      />
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 16 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
       >
+        <Banner source={require("../../../assets/art/banner-item.png")} height={200} />
+        <View style={{ paddingHorizontal: 16, gap: 16 }}>
         {!item ? null : (
           <>
             <Card className="p-4">
@@ -257,6 +245,7 @@ export default function ItemScreen() {
             </Pill>
           </>
         )}
+        </View>
       </ScrollView>
 
       <Sheet visible={picking} title={moving ? "Перенести на" : "Когда это было"} onClose={() => setPicking(false)}>

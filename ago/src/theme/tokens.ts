@@ -3,15 +3,17 @@
 // Use Tailwind classes for layout; these are for props that take raw values
 // (icon colors, SVG fills, shadows, gradients).
 export const C = {
-  bg: "#0B0B0C",
+  bg: "#000000",
   card: "#1C1C1E",
-  card2: "#2A2A2E",
+  card2: "#2C2C2E",
   /** cards on screens whose own fill is the card colour (profile) */
-  raised: "#242428",
-  line: "rgba(255,255,255,0.08)",
+  raised: "#2C2C2E",
+  /** floating controls: the glass fallback fill */
+  ctrl: "#343436",
+  line: "rgba(255,255,255,0.13)",
   t1: "#FFFFFF",
-  t2: "#9A9AA0",
-  t3: "#888890",
+  t2: "#8E8E93",
+  t3: "#6B6B70",
   /** placeholder (and the search glass) in inputs */
   hint: "#7E7E87",
   /** the main action colour: lime on near-black, text on it is almost black */
@@ -28,7 +30,7 @@ export const C = {
 
 // Exactly two control heights.
 export const H = { lg: 52, sm: 40 } as const;
-export const R = { card: 24, tile: 18, sheet: 32, pill: 999 } as const;
+export const R = { card: 22, tile: 18, sheet: 32, menu: 20, pill: 999 } as const;
 // Spacing scale: 4 / 8 / 12 / 16 / 24 / 32.
 export const S = { xs: 4, s: 8, m: 12, l: 16, xl: 24, xxl: 32 } as const;
 

@@ -290,30 +290,3 @@ export function Field({
   );
 }
 
-/** Round "+" next to a screen title. */
-export function HeaderAdd({ onPress, label }: { onPress: () => void; label: string }) {
-  return (
-    <GlassCircle
-      size={H.lg}
-      onPress={() => {
-        haptic("light");
-        onPress();
-      }}
-      label={label}
-    >
-      <Plus size={24} color={C.t1} />
-    </GlassCircle>
-  );
-}
-
-export function ScreenTitle({ title, sub, right, compact }: { title: string; sub?: string; right?: React.ReactNode; compact?: boolean }) {
-  return (
-    <View className={`flex-row ${sub ? "items-end" : "items-center"} justify-between gap-3 px-1 ${compact ? "pb-3" : "pb-6"} pt-2`}>
-      <View className="flex-1">
-        <Txt className="font-m800 text-[26px]" style={{ letterSpacing: -0.5 }}>{title}</Txt>
-        {sub ? <Txt className="mt-1 text-sm text-t2">{sub}</Txt> : null}
-      </View>
-      {right}
-    </View>
-  );
-}

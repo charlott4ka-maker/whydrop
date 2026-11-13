@@ -7,14 +7,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: "#0B0B0C",
+        bg: "#000000",
         card: "#1C1C1E",
-        card2: "#2A2A2E",
-        raised: "#242428",
-        line: "rgba(255,255,255,0.08)",
+        card2: "#2C2C2E",
+        raised: "#2C2C2E",
+        ctrl: "#343436",
+        line: "rgba(255,255,255,0.13)",
         t1: "#FFFFFF",
-        t2: "#9A9AA0",
-        t3: "#888890",
+        t2: "#8E8E93",
+        t3: "#6B6B70",
         lime: "#C8FF4A",
         onLime: "#101400",
         limeSoft: "rgba(200,255,74,0.16)",
@@ -38,7 +39,7 @@ module.exports = {
       // Buttons and controls come in exactly two heights.
       height: { lg: 52, sm: 40 },
       width: { lg: 52, sm: 40 },
-      borderRadius: { card: 24, tile: 18, sheet: 32 },
+      borderRadius: { card: 22, tile: 18, sheet: 32, menu: 20 },
     },
   },
   plugins: [],

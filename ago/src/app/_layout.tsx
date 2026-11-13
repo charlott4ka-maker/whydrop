@@ -7,7 +7,6 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { Glow } from "../components/Glow";
 import { ToastHost } from "../components/Toast";
 import { loadPrefs, usePrefs } from "../lib/prefs";
 import { C } from "../theme/tokens";
@@ -39,11 +38,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider value={theme}>
         <StatusBar style="light" />
-        <Glow />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" } }}>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.bg } }}>
           <Stack.Protected guard={onboarded}>
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="index" />
             <Stack.Screen name="item/[id]" />
+            <Stack.Screen name="archive" />
+            <Stack.Screen name="settings" />
+            <Stack.Screen name="stats" />
           </Stack.Protected>
           <Stack.Protected guard={!onboarded}>
             <Stack.Screen name="onboarding" />
