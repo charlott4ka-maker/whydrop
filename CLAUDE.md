@@ -180,7 +180,11 @@ rules below come from.
 - The screens carry two illustrated banners in that same hand: a bathroom shelf
   on the пункт screen and a roadside scene on Итоги. They are colourful, with
   flat fills inside a heavy outline, and their top edge is pure black so they
-  butt against the page with no seam.
+  butt against the page with no seam. The bottom edge is never a hard cut: a
+  gradient from transparent to the page black runs over the lower half, so the
+  art dissolves into the screen. Fit the art by padding it with black at the
+  sides, not by cropping it: the background is black anyway, and cropping eats
+  the top of the drawing.
 - Generate art from the reference, never from a description of it. Attach the
   mascot (and the scene reference where there is one) to the request, and say
   only what changes. Describing the style in words gives something that merely
@@ -202,8 +206,10 @@ rules below come from.
   glyph at 22, the label at 17, the value in grey, a chevron at the right, and
   a hairline (white 10%) between rows inset to the label. No coloured tiles
   here: that is a whydrop pattern, and Mononote's plain glyphs read calmer.
-- Under a group sits a hint: 15, `#8E8E93`, one line where it can be. It explains
-  what the group does, which is why the screens need almost no onboarding.
+- Hints belong to Настройки and nowhere else: 15, `#8E8E93`, under the group
+  they explain, one line where it can be. The content screens carry none. A
+  line under a list telling you to long-press to delete is the interface
+  apologising for itself; if a gesture needs a caption it needs a redesign.
 - Lime stays the one colour on the screen: the primary button, the selected
   chip, a count that has run over. Everything else is white or grey.
 - The whole set lives in the "Ago" section of the Figma file
