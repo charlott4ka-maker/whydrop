@@ -42,7 +42,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "build:dev": "eas build --platform ios --profile development",
-    "build:ios": "eas build --platform ios --profile production"
+    "build:ios": "eas build --platform ios --profile production",
+    "go": "expo start --go --clear"
   },
   "private": true
 }
