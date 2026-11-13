@@ -192,16 +192,17 @@ rules below come from.
 
 ## Ago's look (Mononote, not whydrop)
 - Ago does not inherit whydrop's look, only its tokens and its icon rules. The
-  reference is Mononote, and its surfaces are not a hand-made gradient: they
-  are a real material. In Figma that is the Glass effect over a grey tint
-  (`#B2B2B2`), never a white one and never a stacked gradient, which is what
-  makes it read grey instead of milky. Radius 22, no stroke; the light angle
-  does the top edge on its own. Four weights, by what the surface is:
-  card 11% / glass 30 / depth 20, sheet 13% / 40 / 24, field and chip
-  17% / 20 / 14, round button 23% / 20 / 12. On a pure black page.
-- In code that is the system material, not a painted colour: `expo-blur` and
-  `expo-glass-effect` are already dependencies, so a card is a BlurView on a
-  dark tint, not a `bg-card` class.
+  reference is Mononote: a pure black page and solid, opaque surfaces on it.
+  Cards are `#1C1C1E`, fields and chips `#2C2C2E`, round buttons `#343436`,
+  radius 22, no stroke. We tried translucent glass here and it was wrong: on a
+  flat black page there is nothing behind a surface to refract, so the effect
+  only greys the card down and makes it look dirty.
+- Glass belongs to the floating navigation layer and nowhere else: the profile
+  pill, the action pills, the round nav buttons, the bottom row, and the system
+  context menu, which is material because iOS makes it material. It never goes
+  on a card, a field or a chip. That is Apple's own rule, and it is also why
+  glass looks dirty on content: a card has the flat page behind it and nothing
+  to refract, while a floating control has the list sliding under it.
 - Settings and most lists are grouped cards of 56pt rows: a plain white lucide
   glyph at 22, the label at 17, the value in grey, a chevron at the right, and
   a hairline (white 10%) between rows inset to the label. No coloured tiles
