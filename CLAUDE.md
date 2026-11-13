@@ -108,11 +108,20 @@ rules below come from.
   (and accepted from inside Instagram) can connect.
 
 ## Ago (ago/)
-- Three tabs on the **system** tab bar, so iOS 26 gives it real Liquid Glass
-  instead of an imitation. Glass goes on the floating navigation layer only,
-  never on cards: Apple's own guidance, and glass on glass turns to mush.
-  Screens paint no background; one `Glow` layer sits under all of them, because
-  on flat black there is nothing for glass to refract.
+- No tab bar. Ago is one screen, and everything else hangs off its corners the
+  way Mononote does it: the profile pill top left, search and a "..." menu top
+  right, and a floating row at the bottom with the view switcher on the left,
+  the add button in the middle and the archive on the right. The "..." holds
+  Архив and Настройки, so the two former tabs became menu items and the list
+  got the whole screen back.
+- Profiles are the paid thing. One profile is free and unnamed work the app
+  never asks about; several of them (личное, работа, дом, each with its own
+  list) is what Ago PRO sells, together with the unlimited list, the widget and
+  the alternate icon. The profile menu shows the locked rows rather than hiding
+  them, so the offer is visible without a single upsell screen in the way.
+- Every screen is built on auto-layout, in Figma and in the app: rows, cards and
+  the screen itself. Nothing is positioned by hand except a popover, which is
+  absolute by nature. That is what keeps the spacing honest.
 - The app keeps every mark, not just the last date, and reads the habit off
   them: the median gap over at least three marks. Median, not mean, so one
   skipped year does not rewrite what "usually" means. A hand-set interval always
