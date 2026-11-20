@@ -126,8 +126,10 @@ export default function ItemScreen() {
               {item.marks[0] ? (
                 <Txt className="mt-1 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
                   {dateLabel(item.marks[0].at)}
-                  {r ? ` · ${r}` : ""}
                 </Txt>
+              ) : null}
+              {item.marks[0] && r ? (
+                <Txt className="mt-1 text-[13px] text-t3">{r}</Txt>
               ) : null}
               {every ? (
                 <>
@@ -251,7 +253,7 @@ export default function ItemScreen() {
       <Sheet visible={picking} title={moving ? "Перенести на" : "Когда это было"} onClose={() => setPicking(false)}>
         <Calendar value={pickDate} onChange={setPickDate} />
         <Txt className="mt-4 text-center text-[15px] text-t2">
-          {dateLabel(pickDate.toISOString())} · {daysSince(pickDate.toISOString())} {daysWord(daysSince(pickDate.toISOString()))} назад
+          {dateLabel(pickDate.toISOString())}, {daysSince(pickDate.toISOString())} {daysWord(daysSince(pickDate.toISOString()))} назад
         </Txt>
         <View className="mt-6">
           <Pill

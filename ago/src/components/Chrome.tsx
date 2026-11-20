@@ -25,7 +25,7 @@ export function TopChrome({
         <Txt className="font-m600 text-[17px]">{profile}</Txt>
         <ChevronDown size={16} color={C.t2} absoluteStrokeWidth strokeWidth={1.5} />
       </GlassPill>
-      <GlassPill label="Ещё" px={16} py={10} gap={18}>
+      <GlassPill label="Ещё" px={2} py={0} gap={0}>
         {actions}
       </GlassPill>
     </View>

@@ -25,18 +25,21 @@ import { daysWord, everyLabel } from "../lib/time";
 import { C } from "../theme/tokens";
 
 const SUGGEST = [
-  "Меняла линзы",
-  "Стирала шторы",
-  "Была у стоматолога",
-  "Меняла зубную щётку",
-  "Звонила бабушке",
-  "Поливала цветы",
-  "Меняла фильтр в воде",
-  "Делала маску",
+  "Линзы",
+  "Шторы",
+  "Стоматолог",
+  "Зубная щётка",
+  "Бабушка",
+  "Цветы",
+  "Фильтр для воды",
+  "Маска",
 ];
 
 /** Поиск появляется, когда список перестаёт умещаться в голове. */
 const BUSY = 8;
+
+/** Тач-зона 44x44: символ маленький, попадать по нему пальцем всё равно надо. */
+const TAP = { width: 44, height: 44, alignItems: "center", justifyContent: "center" } as const;
 
 const VIEW_LABEL: Record<ListView, string> = { rows: "Строки", big: "Крупно", tiles: "Плитки" };
 
@@ -109,10 +112,11 @@ export default function Home() {
                 setSearching((v) => !v);
               }}
               accessibilityLabel="Поиск"
+              style={TAP}
             >
               <Search size={20} color={C.t1} absoluteStrokeWidth strokeWidth={1.5} />
             </Pressable>
-            <Pressable onPress={() => setMenu("more")} accessibilityLabel="Ещё">
+            <Pressable onPress={() => setMenu("more")} accessibilityLabel="Ещё" style={TAP}>
               <Ellipsis size={20} color={C.t1} absoluteStrokeWidth strokeWidth={1.5} />
             </Pressable>
           </>
@@ -144,7 +148,7 @@ export default function Home() {
 
         {items === null ? null : all.length === 0 ? (
           <View className="pt-10">
-            <Empty icon={Clock} title="Пока пусто" sub="Добавьте первое дело, и Ago начнёт считать дни." />
+            <Empty icon={Clock} title="Пока пусто" sub="Добавь первое дело, и Ago начнёт считать дни." />
             <Txt className="mb-3 mt-6 px-1 text-[13px] text-t3">Например:</Txt>
             <View className="flex-row flex-wrap gap-2">
               {SUGGEST.map((s) => (
@@ -267,7 +271,7 @@ function Row({ item, onOpen, onDone, onDrop }: { item: Item; onOpen: () => void;
         {every ? <Txt className="text-[13px] text-t2">{everyLabel(every)}</Txt> : null}
       </View>
       <Txt className={`font-m600 text-[17px] ${over ? "text-lime" : ""}`}>
-        {d == null ? "—" : `${d} ${daysWord(d)}`}
+        {d == null ? "ни разу" : `${d} ${daysWord(d)}`}
       </Txt>
     </Pressable>
   );

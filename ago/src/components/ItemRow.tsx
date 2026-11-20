@@ -39,7 +39,7 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
           </View>
         ) : null}
         {days === null ? (
-          <Txt className="font-m700" style={{ fontSize: 19, color: accent, minWidth: 44, textAlign: "right" }}>—</Txt>
+          <Txt className="font-m700" style={{ fontSize: 19, color: accent, minWidth: 44, textAlign: "right" }}>ни разу</Txt>
         ) : (
           <Counter
             value={days}
@@ -117,8 +117,8 @@ export function ItemRow({ item, view, onDone }: { item: Item; view: ViewKind; on
         )}
         <Txt className="mt-1 text-[13px] text-t3" style={{ fontVariant: ["tabular-nums"] }}>
           {last ? dateLabel(last.at) : "ещё не отмечено"}
-          {r ? ` · ${r}` : ""}
         </Txt>
+        {r ? <Txt className="mt-1 text-[13px] text-t3">{r}</Txt> : null}
         {item.note ? (
           <Txt numberOfLines={1} className="mt-1 text-[13px] text-t3">{item.note}</Txt>
         ) : null}

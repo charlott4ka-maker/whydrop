@@ -71,6 +71,24 @@ rules below come from.
 - No em/en dashes in UI copy, and no "(optional)" on labels.
 - Don't gender the user in UI copy: the app is for whoever installs it.
 
+## Design rules (Daria's, they win over anything below)
+- No em dash in UI copy, and no "·" joining two facts. Use a comma, a separate
+  line, or a label/value pair. A dash is allowed only where Daria typed it.
+- A button is named after its result ("Отметить сегодня", "Купить за 8,99 USD"),
+  never "Далее" or "Продолжить". Informational dialogs close with "Понятно",
+  skipping is "В другой раз".
+- One voice: the app says "ты" everywhere, and never genders the person. Not
+  "Отметила", not "Меняла линзы" in a suggestion; nouns instead ("Линзы").
+- Tap targets are at least 44x44, even when the glyph inside is 20. A symbol
+  sitting in a pill still needs its own 44 zone.
+- Text never touches its container's padding: a title that can grow is Fill and
+  truncates, so it cannot collide with the value on its right.
+- Figma frames are named `N.N - name [state]`, English, no Cyrillic, no v1/v2.
+  No captions or explanations floating over screens inside a section: the frame
+  name carries it. Screens run left to right along the user's path.
+- Every element means something in the real product. No invented counters or
+  placeholder slots for a limit that does not exist.
+
 ## Words
 - The thing the app produces is a **разбор**, never a "диагноз": the old word
   promised a doctor's verdict and declined badly. The button says "Узнать

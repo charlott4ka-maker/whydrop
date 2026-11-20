@@ -76,7 +76,7 @@ export function ItemSheet({
           setTitle(v);
           if (error) setError(false);
         }}
-        placeholder="Меняла линзы"
+        placeholder="Линзы"
         autoCapitalize="sentences"
         autoFocus={isNew}
         error={error}
